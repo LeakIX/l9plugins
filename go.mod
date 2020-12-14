@@ -3,7 +3,7 @@ module github.com/LeakIX/l9plugins
 go 1.11
 
 require (
-	github.com/LeakIX/l9format v0.0.0-20201214154725-a87487aeea29
+	github.com/LeakIX/l9format v0.0.0-20201214210401-15e0f43e4b97
 	github.com/aws/aws-sdk-go v1.36.7 // indirect
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/klauspost/compress v1.11.3 // indirect

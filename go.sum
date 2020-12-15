@@ -23,6 +23,10 @@ github.com/LeakIX/l9format v0.0.0-20201214201915-eb4e52acb7ec h1:wV3Ig0IarcaLkpC
 github.com/LeakIX/l9format v0.0.0-20201214201915-eb4e52acb7ec/go.mod h1:g/Lf4+9A69MaI9F6bJS6UcEbvSbv1NS5rLx/vLpHnYw=
 github.com/LeakIX/l9format v0.0.0-20201214210401-15e0f43e4b97 h1:UB/vlM/z/wTLLTQyBFL35YM9SfTdNAGLy4RO2B7YczM=
 github.com/LeakIX/l9format v0.0.0-20201214210401-15e0f43e4b97/go.mod h1:g/Lf4+9A69MaI9F6bJS6UcEbvSbv1NS5rLx/vLpHnYw=
+github.com/LeakIX/l9format v0.0.0-20201215003031-c4aac012e2ba h1:M17b81QRO1Blo5lmHEtbhG36ZUA025eEapbhIDEzQMs=
+github.com/LeakIX/l9format v0.0.0-20201215003031-c4aac012e2ba/go.mod h1:g/Lf4+9A69MaI9F6bJS6UcEbvSbv1NS5rLx/vLpHnYw=
+github.com/LeakIX/l9format v0.6.0 h1:VcjKDz5fyTmMGl/Vsdm1QE/72EZAj0wDjXTom93N+IE=
+github.com/LeakIX/l9format v0.6.0/go.mod h1:g/Lf4+9A69MaI9F6bJS6UcEbvSbv1NS5rLx/vLpHnYw=
 github.com/aws/aws-sdk-go v1.34.28 h1:sscPpn/Ns3i0F4HPEWAVcwdIRaZZCuL7llJ2/60yPIk=
 github.com/aws/aws-sdk-go v1.34.28/go.mod h1:H7NKnBqNVzoTJpGfLrQkkD+ytBA93eiDYi/+8rV9s48=
 github.com/aws/aws-sdk-go v1.36.7 h1:XoJPAjKoqvdL531XGWxKYn5eGX/xMoXzMN5fBtoyfSY=

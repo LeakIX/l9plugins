@@ -2,15 +2,11 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"github.com/LeakIX/l9format"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 	"go.mongodb.org/mongo-driver/x/mongo/driver"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/operation"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/topology"
 	"log"
 	"net"
@@ -41,75 +37,60 @@ func (MongoOpenPlugin) GetStage() string {
 }
 
 func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event) (leak l9format.L9LeakEvent, hasLeak bool) {
+	leak.Severity = l9format.SEVERITY_HIGH
+	leak.Type = "open_database"
+	leak.Data = ""
 	hasLeak = false
+	//Build client
 	deadline, hasDeadline := ctx.Deadline()
-
 	mongoUrl := fmt.Sprintf("mongodb://%s", net.JoinHostPort(event.Ip, event.Port))
-
-	connectOptions := options.Client().
-		ApplyURI(mongoUrl).
-		SetDialer(plugin)
-	if event.HasTransport("tls") {
-		connectOptions.SetTLSConfig(&tls.Config{InsecureSkipVerify: true})
+	cs, err := connstring.ParseAndValidate(mongoUrl)
+	if err != nil {
+		log.Println(err)
+		return leak, hasLeak
 	}
-	connectOptions.SetDisableOCSPEndpointCheck(true)
 	if hasDeadline {
-		connectOptions.SetConnectTimeout(deadline.Sub(time.Now()))
+		cs.ConnectTimeout = deadline.Sub(time.Now())
 	}
-	client, err := mongo.Connect(ctx, connectOptions)
+	tp, err := topology.New(topology.WithConnString(func(connstring.ConnString) connstring.ConnString { return cs }))
 	if err != nil {
-		log.Println("Connect error: " + err.Error())
+		log.Println(err)
 		return leak, hasLeak
 	}
-	err = client.Ping(ctx, reeadpref.)
-	defer client.Disconnect(ctx)
-	dbList, err := client.ListDatabases(nil, bson.D{{}})
+	err = tp.Connect()
 	if err != nil {
-		log.Println("ListDB error: " + err.Error())
+		log.Println(err)
 		return leak, hasLeak
 	}
-	event.Service.Credentials = l9format.ServiceCredentials{
-		NoAuth: true,
+	defer tp.Disconnect(ctx)
+	// List collections
+	op := operation.NewListCollections(nil).Deployment(tp).Database("admin")
+	err = op.Execute(ctx)
+	if err != nil {
+		log.Println(err)
+		return leak, hasLeak
 	}
-	// Fill some server info
-	event.Service.Software.OperatingSystem, event.Service.Software.Version, _ = getServerVersion(ctx, client)
-	event.Service.Software.Name = "MongoDB"
-	if len(dbList.Databases) > 0 {
+	cursor, err := op.Result(driver.CursorOptions{BatchSize: 20})
+	if err != nil {
+		log.Println(err)
+		return leak, hasLeak
+	}
+	for cursor.Next(ctx) {
+		documents, err := cursor.Batch().Documents()
+		if err != nil {
+			return leak, hasLeak
+		}
+		for _, document := range documents {
+			leak.Dataset.Collections++
+			leak.Data += fmt.Sprintf("Found collection %s\n", document.Lookup("name").String())
+		}
+		if leak.Dataset.Collections > 128 {
+			break
+		}
+	}
+	if leak.Dataset.Collections > 0 {
 		hasLeak = true
-		leak.Type = "open_database"
-		leak.Severity = l9format.SEVERITY_HIGH
-		leak.Data = fmt.Sprintf("No authentication on MongoDB server, found %d collections", len(dbList.Databases))
-		leak.Dataset.Collections = int64(len(dbList.Databases))
+		leak.Data = fmt.Sprintf("Found %d collections:\n%s", leak.Dataset.Collections, leak.Data)
 	}
 	return leak, hasLeak
-}
-
-func getServerVersion(ctx context.Context, client *mongo.Client) (string, string, error) {
-	serverStatus, err := client.Database("admin").RunCommand(
-		ctx,
-		bsonx.Doc{{"serverStatus", bsonx.Int32(1)}},
-	).DecodeBytes()
-	if err != nil {
-		return "", "", err
-	}
-	log.Println("got status")
-	version, err := serverStatus.LookupErr("version")
-	if err != nil {
-		return "", "", err
-	}
-
-	hostInfo, err := client.Database("admin").RunCommand(
-		ctx,
-		bsonx.Doc{{"hostInfo", bsonx.Int32(1)}},
-	).DecodeBytes()
-	if err != nil {
-		return "", version.StringValue(), err
-	}
-	log.Println("got info")
-	os, err := hostInfo.LookupErr("extra", "versionString")
-	if err != nil {
-		return "", version.StringValue(), err
-	}
-	log.Println("got extra")
-	return os.StringValue(), version.StringValue(), nil
 }

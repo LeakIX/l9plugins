@@ -26,7 +26,7 @@ func (ElasticSearchOpenPlugin) GetVersion() (int, int, int) {
 }
 
 func (ElasticSearchOpenPlugin) GetProtocols() []string {
-	return []string{"elasticsearch","kibana"}
+	return []string{"elasticsearch", "kibana"}
 }
 
 func (ElasticSearchOpenPlugin) GetName() string {
@@ -51,7 +51,7 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 			kibanaVersionHeader = kbnVersion
 			versionSplit := strings.Split(kibanaVersionHeader, ".")
 			if len(versionSplit) > 1 && versionSplit[0] != "2" && versionSplit[0] != "3" && versionSplit[0] != "4" && versionSplit[0] != "5" {
-				method= "POST"
+				method = "POST"
 				url = "/api/console/proxy?path=" + url2.QueryEscape("/_nodes") + "&method=GET"
 			}
 			isKibana = true
@@ -60,7 +60,7 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 		if headerName == "Kbn-Name" {
 			//assume >= 7.x
 			isKibana = true
-			method= "POST"
+			method = "POST"
 			url = "/api/console/proxy?path=" + url2.QueryEscape("/_nodes") + "&method=GET"
 		}
 	}
@@ -106,10 +106,9 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 		break
 	}
 	// There's no index summary we can find in our reply, dispatch to explore a F** it :)
-	event.Service.Credentials = l9format.ServiceCredentials{NoAuth:   true}
+	event.Service.Credentials = l9format.ServiceCredentials{NoAuth: true}
 
 	event.Service.Software.Name = "Elasticsearch"
-
 
 	leak.Data += "NoAuth\n"
 	if isKibana {
@@ -157,5 +156,3 @@ type ElasticSearchCatNodesResponse struct {
 		} `json:"os"`
 	} `json:"nodes"`
 }
-
-

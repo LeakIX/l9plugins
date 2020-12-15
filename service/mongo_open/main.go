@@ -43,7 +43,10 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event) 
 	hasLeak = false
 	//Build client
 	deadline, hasDeadline := ctx.Deadline()
-	mongoUrl := fmt.Sprintf("mongodb://%s", net.JoinHostPort(event.Ip, event.Port))
+	mongoUrl := fmt.Sprintf("mongodb://%s/", net.JoinHostPort(event.Ip, event.Port))
+	if event.HasTransport("tls") {
+		mongoUrl += "?tls=true&tlsAllowInvalidCertificates=true&tlsInsecure=true"
+	}
 	cs, err := connstring.ParseAndValidate(mongoUrl)
 	if err != nil {
 		log.Println(err)
@@ -55,11 +58,13 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event) 
 	tp, err := topology.New(topology.WithConnString(func(connstring.ConnString) connstring.ConnString { return cs }))
 	if err != nil {
 		log.Println(err)
+		leak.Data += err.Error() + "\n"
 		return leak, hasLeak
 	}
 	err = tp.Connect()
 	if err != nil {
 		log.Println(err)
+		leak.Data += err.Error() + "\n"
 		return leak, hasLeak
 	}
 	defer tp.Disconnect(ctx)
@@ -68,11 +73,13 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event) 
 	err = op.Execute(ctx)
 	if err != nil {
 		log.Println(err)
+		leak.Data += err.Error() + "\n"
 		return leak, hasLeak
 	}
 	cursor, err := op.Result(driver.CursorOptions{BatchSize: 20})
 	if err != nil {
 		log.Println(err)
+		leak.Data += err.Error() + "\n"
 		return leak, hasLeak
 	}
 	for cursor.Next(ctx) {

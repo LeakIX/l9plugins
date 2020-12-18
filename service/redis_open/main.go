@@ -33,7 +33,7 @@ func (RedisOpenPlugin) GetStage() string {
 	return "open"
 }
 
-func (plugin RedisOpenPlugin) Run(ctx context.Context, event *l9format.L9Event) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin RedisOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     net.JoinHostPort(event.Ip, event.Port),
 		Password: "", // no password set

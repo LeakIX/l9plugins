@@ -36,7 +36,7 @@ func (MongoOpenPlugin) GetStage() string {
 	return l9format.STAGE_OPEN
 }
 
-func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
 	leak.Severity = l9format.SEVERITY_HIGH
 	leak.Type = "open_database"
 	leak.Data = ""

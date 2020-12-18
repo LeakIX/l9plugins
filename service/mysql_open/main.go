@@ -18,7 +18,7 @@ type MysqlWeakPlugin struct {
 func New() l9format.ServicePluginInterface {
 	plugin := MysqlWeakPlugin{}
 	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
-		return  plugin.DialContext(ctx , "tcp", remoteAddr)
+		return plugin.DialContext(ctx, "tcp", remoteAddr)
 	})
 	return plugin
 }
@@ -41,12 +41,12 @@ func (MysqlWeakPlugin) GetStage() string {
 
 var verQueryString = "select @@version_comment, @@version, concat(@@version_compile_os, \" \", @@version_compile_machine);"
 
-func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
 	for _, username := range usernames {
 		for _, password := range passwords {
-			dsn := fmt.Sprintf("%s:%s@l9tcp(%s)/information_schema?readTimeout=3s&timeout=3s&writeTimeout=3s", username, password, net.JoinHostPort(event.Ip, event.Port) )
+			dsn := fmt.Sprintf("%s:%s@l9tcp(%s)/information_schema?readTimeout=3s&timeout=3s&writeTimeout=3s", username, password, net.JoinHostPort(event.Ip, event.Port))
 			log.Printf("Trying: %s", dsn)
-			db, err := sql.Open("mysql", dsn )
+			db, err := sql.Open("mysql", dsn)
 
 			err = db.PingContext(ctx)
 			if err != nil {

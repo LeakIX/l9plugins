@@ -38,7 +38,7 @@ func (ElasticSearchOpenPlugin) GetStage() string {
 }
 
 // Get info
-func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L9Event) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
 	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip, event.Port))
 	isKibana := false
 	url := "/_nodes"

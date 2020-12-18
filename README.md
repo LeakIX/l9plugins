@@ -11,6 +11,7 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |Plugin|Protocols|Stage|Description|
 |------|-----|---|---|
 |mysql_open|mysql|open|Connects and checks for default credentials|
+|mysql_explore|mysql|explore|Connects and list databases, sizes|
 |mongo_open|mongo|open|Connects and checks for open instance|
 |elasticsearch_open|elasticsearch,kibana|open|Connects and checks for open instance|
 |redis_open|redis|open|Connects and checks for open instance|

@@ -13,7 +13,9 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |mysql_open|mysql|open|Connects and checks for default credentials|
 |mysql_explore|mysql|explore|Connects and list databases, sizes|
 |mongo_open|mongo|open|Connects and checks for open instance|
+|mongo_explore|mongo|explore|Connects and list collections, sizes|
 |elasticsearch_open|elasticsearch,kibana|open|Connects and checks for open instance|
+|elasticsearch_explore|elasticsearch,kibana|explore|Connects and list index, sizes|
 |redis_open|redis|open|Connects and checks for open instance|
 
 ### Creating service plugins

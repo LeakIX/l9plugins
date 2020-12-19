@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	url2 "net/url"
+	"strconv"
 	"strings"
 )
 
@@ -40,30 +41,27 @@ func (ElasticSearchOpenPlugin) GetStage() string {
 // Get info
 func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
 	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip, event.Port))
-	isKibana := false
 	url := "/_nodes"
 	method := "GET"
-	kibanaVersionHeader := "0.0.0"
-	// We have this if rerouted from HTTP :/
-	for headerName, kbnVersion := range event.Http.Headers {
-		if headerName == "Kbn-Version" && len(kbnVersion) == 1 {
+	// Requires deep-http from l9tcpid
+	if event.Protocol == "kibana" {
+		majorVersion := 0
+		versionSplit := strings.Split(event.Service.Software.Version, ".")
+		if len(versionSplit) > 1 {
+			majorVersion, _ = strconv.Atoi(versionSplit[0])
+		}
+		method = "POST"
+		url = "/api/console/proxy?path=" + url2.QueryEscape("/_nodes") + "&method=GET"
+		if majorVersion != 0 && majorVersion  < 5{
+			method = "GET"
 			url = "/elasticsearch/_nodes"
-			kibanaVersionHeader = kbnVersion
-			versionSplit := strings.Split(kibanaVersionHeader, ".")
-			if len(versionSplit) > 1 && versionSplit[0] != "2" && versionSplit[0] != "3" && versionSplit[0] != "4" && versionSplit[0] != "5" {
-				method = "POST"
-				url = "/api/console/proxy?path=" + url2.QueryEscape("/_nodes") + "&method=GET"
-			}
-			isKibana = true
-			break
 		}
-		if headerName == "Kbn-Name" {
-			//assume >= 7.x
-			isKibana = true
-			method = "POST"
-			url = "/api/console/proxy?path=" + url2.QueryEscape("/_nodes") + "&method=GET"
-		}
+		leak.Data += "Through Kibana endpoint\n"
+		event.Service.Software.Name = "Kibana"
+	} else {
+		event.Service.Software.Name = "Elasticsearch"
 	}
+
 	scheme := "http"
 	if event.HasTransport("tls") {
 		scheme = "https"
@@ -71,7 +69,9 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 	req, err := http.NewRequest(method, fmt.Sprintf("%s://%s:%s%s", scheme, event.Ip, event.Port, url), nil)
 	req.Header["User-Agent"] = []string{"l9plugin-ElasticSearchOpenPlugin/0.1.1 (+https://leakix.net/)"}
 	req.Header["kbn-xsrf"] = []string{"true"}
-
+	if len(event.Service.Software.Version) > 3 && event.Protocol == "kibana" {
+		req.Header["kbn-version"] = []string{event.Service.Software.Version}
+	}
 	if err != nil {
 		log.Println("can't create request:", err)
 		return leak, hasLeak
@@ -101,23 +101,15 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 	hasLeak = true
 	log.Printf("Found %d nodes on ES endpoint, using first only", len(esReply.Nodes))
 	for _, node := range esReply.Nodes {
-		event.Service.Software.Version = node.Version
+		if event.Protocol == "elasticsearch" {
+			event.Service.Software.Version = node.Version
+		}
 		event.Service.Software.OperatingSystem = node.OperatingSystem.Name + " " + node.OperatingSystem.Version
 		break
 	}
 	// There's no index summary we can find in our reply, dispatch to explore a F** it :)
 	event.Service.Credentials = l9format.ServiceCredentials{NoAuth: true}
-
-	event.Service.Software.Name = "Elasticsearch"
-
 	leak.Data += "NoAuth\n"
-	if isKibana {
-		leak.Data += "Through Kibana endpoint\n"
-		event.Service.Software.Name = "Kibana"
-		if kibanaVersionHeader != "0.0.0" {
-			event.Service.Software.Version = kibanaVersionHeader
-		}
-	}
 	leak.Data += "Cluster info:\n"
 	leak.Data += string(httpReply)
 	return leak, hasLeak

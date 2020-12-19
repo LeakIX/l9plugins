@@ -17,7 +17,7 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |elasticsearch_open|elasticsearch,kibana|open|Connects and checks for open instance|
 |elasticsearch_explore|elasticsearch,kibana|explore|Connects and list index, sizes|
 |redis_open|redis|open|Connects and checks for open instance|
-
+|kafka_open|kafka}|open|Connects and lists topics|
 ### Creating service plugins
 
 Checkout the [l9plugin documentation](https://github.com/LeakIX/l9format/blob/master/l9plugin.md) on how to create your plugins.

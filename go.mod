@@ -3,7 +3,7 @@ module github.com/LeakIX/l9plugins
 go 1.11
 
 require (
-	github.com/LeakIX/l9format v0.7.0
+	github.com/LeakIX/l9format v0.7.1
 	github.com/Shopify/sarama v1.27.2
 	github.com/aws/aws-sdk-go v1.36.7 // indirect
 	github.com/go-redis/redis/v8 v8.4.2

@@ -77,7 +77,7 @@ func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 				if err == nil {
 					leak.Dataset.Rows += collectionStats.Count
 					leak.Dataset.Size += collectionStats.Size
-					leak.Data += fmt.Sprintf("with %d documents (%s)", collectionStats.Count, utils.HumanByteCount(collectionStats.Size))
+					leak.Data += fmt.Sprintf(" with %d documents (%s)", collectionStats.Count, utils.HumanByteCount(collectionStats.Size))
 				} else {
 					log.Println(err.Error())
 				}

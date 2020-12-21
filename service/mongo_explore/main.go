@@ -38,7 +38,7 @@ func (MongoSchemaPlugin) GetStage() string {
 }
 
 func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event, pluginOptions map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
-	log.Printf("Trying mongodb://%s", net.JoinHostPort(event.Ip, event.Port))
+	log.Printf("Trying mongodb://%s", net.JoinHostPort(event.Ip,event.Port))
 	mongoUrl := fmt.Sprintf("mongodb://%s/", net.JoinHostPort(event.Ip, event.Port))
 	if event.HasTransport("tls") {
 		mongoUrl += "?tls=true&tlsAllowInvalidCertificates=true&tlsInsecure=true"
@@ -69,8 +69,8 @@ func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 				leak.Dataset.Infected = true
 			}
 			leak.Dataset.Collections++
-			leak.Data += "Found collection " + dbInfo.Name + "." + collectionName
-			result := db.RunCommand(ctx, bson.D{{"collStats", collectionName}, {"scale", 1}})
+			leak.Data += fmt.Sprintf("Found collection %s.%s ", dbInfo.Name, collectionName)
+			result := db.RunCommand(ctx, bson.D{{ "collStats" , collectionName}, {"scale", 1} })
 			if result.Err() == nil {
 				collectionStats := &MongoCollectionDetails{}
 				err = result.Decode(&collectionStats)
@@ -85,7 +85,7 @@ func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 				log.Println(result.Err().Error())
 			}
 			leak.Data += "\n"
-			log.Println("Found collection " + dbInfo.Name + "." + collectionName)
+			log.Printf("Found collection %s.%s\n", dbInfo.Name, collectionName)
 		}
 	}
 	if leak.Dataset.Collections < 1 {
@@ -99,5 +99,5 @@ func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 
 type MongoCollectionDetails struct {
 	Count int64 `json:"count"`
-	Size  int64 `json:"storageSize"`
+	Size int64 `json:"storageSize"`
 }

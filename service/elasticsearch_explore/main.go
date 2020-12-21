@@ -28,7 +28,7 @@ func (ElasticSearchExplorePlugin) GetVersion() (int, int, int) {
 }
 
 func (ElasticSearchExplorePlugin) GetProtocols() []string {
-	return []string{"elasticsearch", "kibana"}
+	return []string{"elasticsearch","kibana"}
 }
 
 func (ElasticSearchExplorePlugin) GetName() string {
@@ -38,10 +38,9 @@ func (ElasticSearchExplorePlugin) GetName() string {
 func (ElasticSearchExplorePlugin) GetStage() string {
 	return "explore"
 }
-
 // Get info
 func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
-	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip, event.Port))
+	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip,event.Port))
 	url := "/_cat/indices?format=json&bytes=b"
 	method := "GET"
 	if event.Protocol == "kibana" {
@@ -50,19 +49,19 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		if len(versionSplit) > 1 {
 			majorVersion, _ = strconv.Atoi(versionSplit[0])
 		}
-		method = "POST"
+		method= "POST"
 		url = "/api/console/proxy?path=" + url2.QueryEscape("/_cat/indices?format=json&bytes=b") + "&method=GET"
-		if majorVersion != 0 && majorVersion < 5 {
+		if majorVersion != 0 && majorVersion  < 5{
 			method = "GET"
 			url = "/elasticsearch/_cat/indices?format=json&bytes=b"
 		}
 		leak.Data += "Through Kibana endpoint\n"
 	}
 	scheme := "http"
-	if event.HasTransport("tls") {
+	if event.HasTransport("tls"){
 		scheme = "https"
 	}
-	req, err := http.NewRequest(method, fmt.Sprintf("%s://%s%s", scheme, net.JoinHostPort(event.Ip, event.Port), url), nil)
+	req, err := http.NewRequest(method, fmt.Sprintf("%s://%s%s", scheme, net.JoinHostPort(event.Ip,event.Port), url), nil)
 	req.Header["User-Agent"] = []string{"l9plugin-ElasticSearchExplorePlugin/0.1.0 (+https://leakix.net/)"}
 	req.Header["kbn-xsrf"] = []string{"true"}
 	if len(event.Service.Software.Version) > 3 {
@@ -98,9 +97,9 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 
 	for _, esIndex := range esReply {
 		if indexSize, err := strconv.ParseInt(esIndex.IndexSize, 10, 64); err == nil {
-			leak.Data += fmt.Sprintf("Found index "+esIndex.Name+" with %s documents (%s)\n", esIndex.DocCount, utils.HumanByteCount(indexSize))
+			leak.Data += fmt.Sprintf("Found index %s with %s documents (%s)\n", esIndex.Name, esIndex.DocCount, utils.HumanByteCount(indexSize))
 		} else {
-			leak.Data += fmt.Sprintf("Found index "+esIndex.Name+" with %s documents (%s)\n", esIndex.DocCount, esIndex.IndexSize)
+			leak.Data += fmt.Sprintf("Found index %s with %s documents (%s)\n", esIndex.Name, esIndex.DocCount, esIndex.IndexSize)
 		}
 		leak.Dataset.Collections++
 		if docCount, err := strconv.ParseInt(esIndex.DocCount, 10, 64); err == nil {
@@ -109,7 +108,7 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		if indexSize, err := strconv.ParseInt(esIndex.IndexSize, 10, 64); err == nil {
 			leak.Dataset.Size += indexSize
 		}
-		if strings.Contains(esIndex.Name, "meow") || strings.Contains(esIndex.Name, "hello") ||
+		if strings.Contains(esIndex.Name, "meow")  || strings.Contains(esIndex.Name, "hello") ||
 			strings.Contains(esIndex.Name, "readme") || strings.Contains(esIndex.Name, "read_me") {
 			leak.Dataset.Infected = true
 		}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/LeakIX/l9format"
 	"github.com/Shopify/sarama"
 	"log"
@@ -12,8 +13,7 @@ import (
 type KafkaOpenPlugin struct {
 	l9format.ServicePluginBase
 }
-
-func main() {}
+func main(){}
 func New() l9format.ServicePluginInterface {
 	return KafkaOpenPlugin{}
 }
@@ -60,7 +60,7 @@ func (plugin KafkaOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	}
 	leak.Data = "NoAuth\n"
 	for _, topic := range topics {
-		leak.Data += "Found topic " + topic + "\n"
+		leak.Data += fmt.Sprintf("Found topic %s\n", topic)
 	}
 	return leak, true
 }

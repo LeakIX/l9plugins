@@ -65,8 +65,8 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 
 	for tableListQuery.Next() {
 		tableListQuery.Scan(&databaseName, &tableName, &recordCount, &dataLength)
-		log.Printf("Found table "+databaseName+"."+tableName+" with %d records\n", recordCount)
-		leak.Data += fmt.Sprintf("Found table "+databaseName+"."+tableName+" with %d records\n", recordCount)
+		log.Printf("Found table %s.%s with %d records\n", databaseName, tableName, recordCount)
+		leak.Data += fmt.Sprintf("Found table %s.%s with %d records\n", databaseName, tableName, recordCount)
 		leak.Dataset.Rows += recordCount
 		leak.Dataset.Collections++
 		leak.Dataset.Size += dataLength

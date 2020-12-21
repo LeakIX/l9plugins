@@ -52,7 +52,7 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 		}
 		method = "POST"
 		url = "/api/console/proxy?path=" + url2.QueryEscape("/_nodes") + "&method=GET"
-		if majorVersion != 0 && majorVersion < 5 {
+		if majorVersion != 0 && majorVersion  < 5{
 			method = "GET"
 			url = "/elasticsearch/_nodes"
 		}

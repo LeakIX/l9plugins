@@ -89,7 +89,7 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 		}
 		for _, document := range documents {
 			leak.Dataset.Collections++
-			leak.Data += fmt.Sprintf("Found collection %s\n", document.Lookup("name").String())
+			leak.Data += "Found collection " + document.Lookup("name").String() + "\n"
 		}
 		if leak.Dataset.Collections > 128 {
 			break
@@ -97,7 +97,7 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	}
 	if leak.Dataset.Collections > 0 {
 		hasLeak = true
-		leak.Data = fmt.Sprintf("Found %d collections:\n%s", leak.Dataset.Collections, leak.Data)
+		leak.Data = fmt.Sprintf("Found %d collections:\n", leak.Dataset.Collections) + leak.Data
 	}
 	return leak, hasLeak
 }

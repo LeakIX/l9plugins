@@ -10,6 +10,13 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 
 |Plugin|Protocols|Stage|Description|
 |------|-----|---|---|
+|apachestatus_http|http|http|Checks for apache status pages|
+|configjson_http|http|http|Scans for valid `config.json` files|
+|dotenv_http|http|http|Scans for valid `.env` files|
+|gitconfig_http|http|http|Scans for valid `.git/config` files|
+|idxconfig_http|http|http|Scans for `/idx_config` directories with text files|
+|laraveltelescope_http|http|http|Scans for open Laravel debuggers|
+|phpinfo_http|http|http|Scans for valid `/phpinfo.php` files|
 |mysql_open|mysql|open|Connects and checks for default credentials|
 |mysql_explore|mysql|explore|Connects and list databases, sizes|
 |mongo_open|mongo|open|Connects and checks for open instance|

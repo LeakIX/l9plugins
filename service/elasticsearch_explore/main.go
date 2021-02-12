@@ -42,6 +42,7 @@ func (ElasticSearchExplorePlugin) GetStage() string {
 func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
 	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip,event.Port))
 	url := "/_cat/indices?format=json&bytes=b"
+	ransonUrl := "/%s/_search?size=1"
 	method := "GET"
 	if event.Protocol == "kibana" {
 		majorVersion := 0
@@ -51,9 +52,11 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		}
 		method= "POST"
 		url = "/api/console/proxy?path=" + url2.QueryEscape("/_cat/indices?format=json&bytes=b") + "&method=GET"
+		ransonUrl = "/api/console/proxy?path=/%s/_search" + url2.QueryEscape("?size=1") + "&method=POST"
 		if majorVersion != 0 && majorVersion  < 5{
 			method = "GET"
 			url = "/elasticsearch/_cat/indices?format=json&bytes=b"
+			ransonUrl = "/elasticsearch/%s/_search?size=1"
 		}
 		leak.Data += "Through Kibana endpoint\n"
 	}
@@ -111,6 +114,10 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		if strings.Contains(esIndex.Name, "meow")  || strings.Contains(esIndex.Name, "hello") ||
 			strings.Contains(esIndex.Name, "readme") || strings.Contains(esIndex.Name, "read_me") {
 			leak.Dataset.Infected = true
+			if ransomNote, found := plugin.GetRansomNote(ctx, fmt.Sprintf(ransonUrl, esIndex.Name), event); found {
+				leak.Dataset.RansomNotes = append(leak.Dataset.RansomNotes, ransomNote)
+			}
+
 		}
 	}
 	leak.Data = fmt.Sprintf("Indices: %d, document count: %d, size: %s\n",
@@ -118,6 +125,49 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		leak.Data
 	// Short leak, a second one will contain indices stats & co
 	return leak, true
+}
+
+func (plugin ElasticSearchExplorePlugin) GetRansomNote(ctx context.Context, url string, event *l9format.L9Event) (ransomNote string, found bool) {
+	scheme := "http"
+	if event.HasTransport("tls"){
+		scheme = "https"
+	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s%s", scheme, net.JoinHostPort(event.Ip,event.Port), url), nil)
+	req.Header["User-Agent"] = []string{"l9plugin-ElasticSearchExplorePlugin/0.1.0 (+https://leakix.net/)"}
+	req.Header["kbn-xsrf"] = []string{"true"}
+	if len(event.Service.Software.Version) > 3 {
+		req.Header["kbn-version"] = []string{event.Service.Software.Version}
+	}
+	if err != nil {
+		log.Println("can't create request:", err)
+		return "", false
+	}
+	// use the http client to fetch the page
+	resp, err := plugin.GetHttpClient(ctx, event.Ip, event.Port).Do(req)
+	if err != nil {
+		log.Println("can't GET page:", err)
+		return "", false
+	}
+	defer resp.Body.Close()
+	httpReply, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("can't read body:", err)
+		return "", false
+	}
+	esReply := ElasticSearchResponse{}
+	err = json.Unmarshal(httpReply, &esReply)
+	if len(esReply.Hits.Hits) == 1 {
+		return string(esReply.Hits.Hits[0].Source), true
+	}
+	return "", false
+}
+
+type ElasticSearchResponse struct {
+	Hits struct{
+		Hits []struct{
+			Source json.RawMessage `json:"_source"`
+		} `json:"hits"`
+	} `json:"hits"`
 }
 
 type ElasticSearchCatIndicesResponse []struct {

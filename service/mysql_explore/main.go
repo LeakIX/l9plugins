@@ -53,11 +53,12 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 	if err != nil {
 		return leak, false
 	}
+	defer db.Close()
 	var databaseName string
 	var tableName string
 	var recordCount int64
 	var dataLength int64
-	tableListQuery, err := db.Query("SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_ROWS, DATA_LENGTH from  TABLES where table_schema != 'information_schema' AND table_schema != 'sys' AND table_schema != 'performance_schema';")
+	tableListQuery, err := db.QueryContext(ctx,"SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_ROWS, DATA_LENGTH from  TABLES where table_schema != 'information_schema' AND table_schema != 'sys' AND table_schema != 'performance_schema';")
 	if err != nil {
 		log.Println(err.Error())
 		return leak, hasLeak
@@ -72,6 +73,9 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 		leak.Dataset.Size += dataLength
 		if strings.Contains(strings.ToLower(tableName), "warning") {
 			leak.Dataset.Infected = true
+			if ransomNote, found := plugin.GetRansomNote(ctx, databaseName, tableName ,event, db) ; found{
+				leak.Dataset.RansomNotes = append(leak.Dataset.RansomNotes, ransomNote)
+			}
 		}
 	}
 	if leak.Dataset.Collections < 1 {
@@ -81,4 +85,34 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 		leak.Dataset.Collections, leak.Dataset.Rows, utils.HumanByteCount(leak.Dataset.Size)) +
 		leak.Data
 	return leak, true
+}
+
+func (MysqlSchemaPlugin) GetRansomNote(ctx context.Context, databaseName, tableName string, event *l9format.L9Event, db *sql.DB) (ransomNote string, found bool) {
+	queryResult, err := db.Query(fmt.Sprintf("SELECT * FROM `%s`.`%s` LIMIT 1", databaseName, tableName))
+	if err != nil {
+		log.Println(err)
+		return "", false
+	}
+	queryResult.Next()
+	columnNames, _ := queryResult.Columns()
+	results := make([]interface{}, len(columnNames))
+	for idx, _ := range results {
+		theString := ""
+		results[idx] = &theString
+	}
+	var note string
+	err = queryResult.Scan(results...)
+	if err != nil {
+		log.Println(err)
+		return "", false
+	}
+	for _, columnContent := range results {
+		if columnText, isString := columnContent.(*string); isString && len(*columnText) > 0{
+			note += *columnText
+		}
+	}
+	if len(note) > 1 {
+		return note, true
+	}
+	return "", false
 }

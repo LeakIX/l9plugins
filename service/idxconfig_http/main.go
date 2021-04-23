@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/LeakIX/IndexOfBrowser"
 	"github.com/LeakIX/l9format"
+	"log"
 	"strings"
 )
 
@@ -40,8 +41,9 @@ func (plugin IdxConfigPlugin) Verify(request l9format.WebPluginRequest, response
 	if !idxConfigRequest.Equal(request) || response.Response.StatusCode != 200 || response.Document == nil {
 		return leak, false
 	}
-	if strings.HasPrefix("Index of /", response.Document.Find("title").Text()) {
-		browser := IndexOfBrowser.NewBrowser(response.Response.Request.URL.String())
+	if strings.HasPrefix(response.Document.Find("title").Text(), "Index of /") {
+		browser := IndexOfBrowser.NewBrowser(event.Url())
+		log.Println(event.Url())
 		files, err := browser.Ls()
 		if err != nil {
 			return leak, false

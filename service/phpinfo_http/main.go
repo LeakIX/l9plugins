@@ -36,22 +36,21 @@ func (PhpInfoHttpPlugin) GetName() string {
 func (PhpInfoHttpPlugin) GetStage() string {
 	return "open"
 }
-func (plugin PhpInfoHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin PhpInfoHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) bool {
 	if !getInfoPhpRequest.Equal(request) || response.Response.StatusCode != 200 || response.Document == nil {
-		return leak, false
+		return false
 	}
-	summary := "Found PHP info page:\n"
+	event.Summary = "Found PHP info page:\n"
 	variableTable := response.Document.Find("h2:containsOwn('PHP Variables')").Next()
 	if variableTable.Is("table") {
 		variableTable.Find("tr").Each(func(i int, selection *goquery.Selection) {
 			if i == 0 {
 				return
 			}
-			summary += strings.TrimSpace(selection.Find("td.e").Text()) + " = " +strings.TrimSpace(selection.Find("td.v").Text()) + "\n"
+			event.Summary += strings.TrimSpace(selection.Find("td.e").Text()) + " = " +strings.TrimSpace(selection.Find("td.v").Text()) + "\n"
 		})
-		leak.Data = summary
-		return leak, true
+		return true
 	}
 
-	return leak, false
+	return false
 }

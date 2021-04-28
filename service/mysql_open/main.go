@@ -41,7 +41,7 @@ func (MysqlWeakPlugin) GetStage() string {
 
 var verQueryString = "select @@version_comment, @@version, concat(@@version_compile_os, \" \", @@version_compile_machine);"
 
-func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) bool {
 	for _, username := range usernames {
 		for _, password := range passwords {
 			dsn := fmt.Sprintf("%s:%s@l9tcp(%s)/information_schema?readTimeout=3s&timeout=3s&writeTimeout=3s", username, password, net.JoinHostPort(event.Ip, event.Port))
@@ -54,7 +54,7 @@ func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 				if _, isMysqlError := err.(*mysql.MySQLError); !isMysqlError {
 					log.Println(err.Error())
 					log.Println("Not a mysql error, leaving early")
-					return leak, hasLeak
+					return false
 				}
 				continue
 			}
@@ -72,12 +72,11 @@ func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 				Username: username,
 				Password: password,
 			}
-			leak.Data = "No or default MySQL authentication found."
-			hasLeak = true
-			return leak, hasLeak
+			event.Summary = "No or default MySQL authentication found."
+			return true
 		}
 	}
-	return leak, hasLeak
+	return false
 }
 
 var usernames = []string{

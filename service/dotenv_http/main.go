@@ -35,21 +35,21 @@ func (DotEnvHttpPlugin) GetName() string {
 func (DotEnvHttpPlugin) GetStage() string {
 	return "open"
 }
-func (plugin DotEnvHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin DotEnvHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
 	if !getEnvRequest.Equal(request) || response.Response.StatusCode != 200 {
-		return leak, false
+		return false
 	}
 	if len(response.Body) > 0 && response.Body[0] == '<' {
-		return leak, false
+		return  false
 	}
 	envConfig, err := godotenv.Unmarshal(string(response.Body))
 	if err != nil {
-		return leak, false
+		return false
 	}
 
 	if len(envConfig) > 1 && len(envConfig) < 2048 {
-		leak.Data = string(response.Body)
-		return leak, true
+		event.Summary = string(response.Body)
+		return true
 	}
-	return leak, false
+	return false
 }

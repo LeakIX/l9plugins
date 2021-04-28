@@ -33,7 +33,7 @@ func (RedisOpenPlugin) GetStage() string {
 	return "open"
 }
 
-func (plugin RedisOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin RedisOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) bool {
 	client := redis.NewClient(&redis.Options{
 		Addr:     net.JoinHostPort(event.Ip, event.Port),
 		Password: "", // no password set
@@ -44,12 +44,12 @@ func (plugin RedisOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		log.Println("Redis PING failed, leaving early : ", err)
-		return leak, false
+		return  false
 	}
 	redisInfo, err := client.Info(ctx).Result()
 	if err != nil {
 		log.Println("Redis INFO failed, leaving early : ", err)
-		return leak, false
+		return false
 	}
 	redisInfoDict := make(map[string]string)
 	redisInfo = strings.Replace(redisInfo, "\r", "", -1)
@@ -63,11 +63,11 @@ func (plugin RedisOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 		event.Service.Software.OperatingSystem, _ = redisInfoDict["os"]
 		event.Service.Software.Name = "Redis"
 		event.Service.Software.Version, _ = redisInfoDict["redis_version"]
-		leak.Severity = l9format.SEVERITY_MEDIUM
-		leak.Data = "Redis is open\n"
-		leak.Type = "open_database"
-		leak.Dataset.Rows = 1
-		return leak, true
+		event.Leak.Severity = l9format.SEVERITY_MEDIUM
+		event.Summary = "Redis is open\n"
+		event.Leak.Type = "open_database"
+		event.Leak.Dataset.Rows = 1
+		return true
 	}
-	return leak, false
+	return false
 }

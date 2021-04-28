@@ -35,9 +35,9 @@ func (ConfigJsonHttp) GetName() string {
 func (ConfigJsonHttp) GetStage() string {
 	return "open"
 }
-func (plugin ConfigJsonHttp) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin ConfigJsonHttp) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
 	if !getServerStatus.Equal(request) || response.Response.StatusCode != 200 {
-		return leak, false
+		return false
 	}
 	var reply CodeJsonReply
 	var fullReply interface{}
@@ -47,18 +47,18 @@ func (plugin ConfigJsonHttp) Verify(request l9format.WebPluginRequest, response 
 	err := json.Unmarshal(response.Body, &reply)
 	err = json.Unmarshal(response.Body, &fullReply)
 	if err != nil {
-		return leak, false
+		return false
 	}
 	if reply.Code != -323211 || reply.Status != reply.Code {
-		return leak, false
+		return false
 	}
-	leak.Dataset.Size = int64(len(response.Body))
+	event.Leak.Dataset.Size = int64(len(response.Body))
 	response.Body, err = json.MarshalIndent(fullReply,"", "  ")
 	if err != nil {
-		return leak, false
+		return false
 	}
-	leak.Data = string(response.Body)
-	return leak, true
+	event.Summary = string(response.Body)
+	return true
 }
 
 type CodeJsonReply struct {

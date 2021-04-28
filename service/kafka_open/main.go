@@ -35,7 +35,7 @@ func (KafkaOpenPlugin) GetStage() string {
 }
 
 // Get info
-func (plugin KafkaOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, pluginOptions map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin KafkaOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, pluginOptions map[string]string) (hasLeak bool) {
 	config := sarama.NewConfig()
 	deadline, hasDeadline := ctx.Deadline()
 	if hasDeadline {
@@ -50,17 +50,17 @@ func (plugin KafkaOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	cluster, err := sarama.NewConsumer(brokers, config)
 	if err != nil {
 		log.Println(err)
-		return leak, false
+		return false
 	}
 	defer cluster.Close()
 	topics, err := cluster.Topics()
 	if err != nil || len(topics) < 1 {
 		log.Println(err)
-		return leak, false
+		return false
 	}
-	leak.Data = "NoAuth\n"
+	event.Summary = "NoAuth\n"
 	for _, topic := range topics {
-		leak.Data += fmt.Sprintf("Found topic %s\n", topic)
+		event.Summary += fmt.Sprintf("Found topic %s\n", topic)
 	}
-	return leak, true
+	return true
 }

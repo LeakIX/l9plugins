@@ -39,7 +39,7 @@ func (ElasticSearchOpenPlugin) GetStage() string {
 }
 
 // Get info
-func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
 	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip, event.Port))
 	url := "/_nodes"
 	method := "GET"
@@ -56,7 +56,7 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 			method = "GET"
 			url = "/elasticsearch/_nodes"
 		}
-		leak.Data += "Through Kibana endpoint\n"
+		event.Summary += "Through Kibana endpoint\n"
 		event.Service.Software.Name = "Kibana"
 	} else {
 		event.Service.Software.Name = "Elasticsearch"
@@ -74,29 +74,29 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 	}
 	if err != nil {
 		log.Println("can't create request:", err)
-		return leak, hasLeak
+		return false
 	}
 	// use the http client to fetch the page
 	resp, err := plugin.GetHttpClient(ctx, event.Ip, event.Port).Do(req)
 	if err != nil {
 		log.Println("can't GET page:", err)
-		return leak, hasLeak
+		return false
 	}
 	defer resp.Body.Close()
 	httpReply, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("can't read body:", err)
-		return leak, hasLeak
+		return false
 	}
 	esReply := ElasticSearchCatNodesResponse{}
 	err = json.Unmarshal(httpReply, &esReply)
 	if err != nil {
 		log.Println("can't parse body:", err)
-		return leak, hasLeak
+		return false
 	}
 	// check if we got stg in tagline
 	if len(esReply.Nodes) < 1 {
-		return leak, hasLeak
+		return false
 	}
 	hasLeak = true
 	log.Printf("Found %d nodes on ES endpoint, using first only", len(esReply.Nodes))
@@ -109,10 +109,10 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 	}
 	// There's no index summary we can find in our reply, dispatch to explore a F** it :)
 	event.Service.Credentials = l9format.ServiceCredentials{NoAuth: true}
-	leak.Data += "NoAuth\n"
-	leak.Data += "Cluster info:\n"
-	leak.Data += string(httpReply)
-	return leak, hasLeak
+	event.Summary += "NoAuth\n"
+	event.Summary += "Cluster info:\n"
+	event.Summary += string(httpReply)
+	return true
 }
 
 // First thing we tried, turns out node API has more info we like

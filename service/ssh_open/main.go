@@ -32,10 +32,10 @@ func (SSHOpenPlugin) GetStage() string {
 	return "open"
 }
 
-func (plugin SSHOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin SSHOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string)  bool {
 	conn, err := plugin.GetL9NetworkConnection(event)
 	if err != nil {
-		return leak, false
+		return  false
 	}
 	_, _, _, _ = ssh.NewClientConn(conn, net.JoinHostPort(event.Ip, event.Port), &ssh.ClientConfig{
 		User: "root",
@@ -51,5 +51,5 @@ func (plugin SSHOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, op
 		Timeout:           5*time.Second,
 
 	})
-	return leak, false
+	return false
 }

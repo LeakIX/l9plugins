@@ -37,7 +37,7 @@ func (MongoSchemaPlugin) GetStage() string {
 	return "explore"
 }
 
-func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event, pluginOptions map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event, pluginOptions map[string]string) (hasLeak bool) {
 	log.Printf("Trying mongodb://%s", net.JoinHostPort(event.Ip,event.Port))
 	mongoUrl := fmt.Sprintf("mongodb://%s/", net.JoinHostPort(event.Ip, event.Port))
 	if event.HasTransport("tls") {
@@ -47,13 +47,13 @@ func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 		ctx, options.Client().ApplyURI(mongoUrl).SetDialer(plugin))
 	if err != nil {
 		log.Println("Connect error: " + err.Error())
-		return leak, false
+		return  false
 	}
 	defer client.Disconnect(nil)
 	dbList, err := client.ListDatabases(ctx, bson.D{{}})
 	if err != nil {
 		log.Println("ListDB error: " + err.Error())
-		return leak, false
+		return  false
 	}
 	for _, dbInfo := range dbList.Databases {
 		db := client.Database(dbInfo.Name)
@@ -62,39 +62,39 @@ func (plugin MongoSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 			continue
 		}
 		if strings.Contains(dbInfo.Name, "READ_ME") || strings.Contains(dbInfo.Name, "WARNING") || strings.Contains(dbInfo.Name, "meow") {
-			leak.Dataset.Infected = true
+			event.Leak.Dataset.Infected = true
 		}
 		for _, collectionName := range collections {
 			if strings.Contains(collectionName, "READ_ME") || strings.Contains(collectionName, "WARNING") || strings.Contains(collectionName, "meow") {
-				leak.Dataset.Infected = true
+				event.Leak.Dataset.Infected = true
 			}
-			leak.Dataset.Collections++
-			leak.Data += fmt.Sprintf("Found collection %s.%s ", dbInfo.Name, collectionName)
+			event.Leak.Dataset.Collections++
+			event.Summary += fmt.Sprintf("Found collection %s.%s ", dbInfo.Name, collectionName)
 			result := db.RunCommand(ctx, bson.D{{ "collStats" , collectionName}, {"scale", 1} })
 			if result.Err() == nil {
 				collectionStats := &MongoCollectionDetails{}
 				err = result.Decode(&collectionStats)
 				if err == nil {
-					leak.Dataset.Rows += collectionStats.Count
-					leak.Dataset.Size += collectionStats.Size
-					leak.Data += fmt.Sprintf(" with %d documents (%s)", collectionStats.Count, utils.HumanByteCount(collectionStats.Size))
+					event.Leak.Dataset.Rows += collectionStats.Count
+					event.Leak.Dataset.Size += collectionStats.Size
+					event.Summary += fmt.Sprintf(" with %d documents (%s)", collectionStats.Count, utils.HumanByteCount(collectionStats.Size))
 				} else {
 					log.Println(err.Error())
 				}
 			} else {
 				log.Println(result.Err().Error())
 			}
-			leak.Data += "\n"
+			event.Summary += "\n"
 			log.Printf("Found collection %s.%s\n", dbInfo.Name, collectionName)
 		}
 	}
-	if leak.Dataset.Collections < 1 {
-		return leak, false
+	if event.Leak.Dataset.Collections < 1 {
+		return false
 	}
-	leak.Data = fmt.Sprintf("Collections: %d, document count: %d, size: %s\n",
-		leak.Dataset.Collections, leak.Dataset.Rows, utils.HumanByteCount(leak.Dataset.Size)) +
-		leak.Data
-	return leak, true
+	event.Summary = fmt.Sprintf("Collections: %d, document count: %d, size: %s\n",
+		event.Leak.Dataset.Collections, event.Leak.Dataset.Rows, utils.HumanByteCount(event.Leak.Dataset.Size)) +
+		event.Summary
+	return true
 }
 
 type MongoCollectionDetails struct {

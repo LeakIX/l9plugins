@@ -38,19 +38,19 @@ func (CouchDbOpenPlugin) GetStage() string {
 }
 
 // Gets a database list and runs futher steps
-func (plugin CouchDbOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin CouchDbOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
 	log.Printf("Discovering %s ...", plugin.GetAddress(event))
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/_all_dbs", plugin.GetAddress(event)), nil)
 	req.Header["User-Agent"] = []string{"TBI-CouchDbOpenPlugin/0.2.0 (+https://leakix.net/)"}
 	req.Header["Content-Type"] = []string{"application/json"}
 	if err != nil {
 		log.Println("can't create request:", err)
-		return leak, false
+		return false
 	}
 	resp, err := plugin.GetHttpClient(ctx, event.Ip, event.Port).Do(req)
 	if err != nil {
 		log.Println("can't GET page:", err)
-		return leak, false
+		return false
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 200 {
@@ -59,40 +59,40 @@ func (plugin CouchDbOpenPlugin) Run(ctx context.Context, event *l9format.L9Event
 		err = jsonDecoder.Decode(&dbList)
 		if err != nil {
 			log.Println("can't parse body:", err)
-			return leak, false
+			return false
 		}
 		if len(dbList) > 0 {
 			return plugin.GetInfos(ctx, event, dbList)
 		}
 	}
-	return leak, false
+	return false
 }
 
 // Iterate over the database list to get more informations
-func (plugin CouchDbOpenPlugin) GetInfos(ctx context.Context, event *l9format.L9Event, dbList []string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin CouchDbOpenPlugin) GetInfos(ctx context.Context, event *l9format.L9Event, dbList []string) (hasLeak bool) {
 	isOpen := plugin.TestOpen(ctx, event)
 	if isOpen {
-		leak.Data += "Weak auth\n"
+		event.Summary += "Weak auth\n"
 	} else {
-		leak.Data += "Schema only\n"
+		event.Summary += "Schema only\n"
 	}
 	for _, dbNames := range plugin.chunkBy(dbList, 50) {
 		for _, dbInfo := range plugin.GetDatabaseInfo(ctx, event, dbNames) {
 			if isOpen {
-				leak.Dataset.Collections++
-				leak.Dataset.Rows += dbInfo.Info.DocCount
-				leak.Dataset.Size += dbInfo.Info.DiskSize
+				event.Leak.Dataset.Collections++
+				event.Leak.Dataset.Rows += dbInfo.Info.DocCount
+				event.Leak.Dataset.Size += dbInfo.Info.DiskSize
 			}
-			leak.Data += fmt.Sprintf("Found table %s with %d documents (%s)\n", dbInfo.Info.Name, dbInfo.Info.DocCount, utils.HumanByteCount(dbInfo.Info.DiskSize))
+			event.Summary += fmt.Sprintf("Found table %s with %d documents (%s)\n", dbInfo.Info.Name, dbInfo.Info.DocCount, utils.HumanByteCount(dbInfo.Info.DiskSize))
 			if strings.Contains(dbInfo.Info.Name, "read_me") || strings.Contains(dbInfo.Info.Name, "wegeturdb") || strings.Contains(dbInfo.Info.Name, "meow") {
-				leak.Dataset.Infected = true
+				event.Leak.Dataset.Infected = true
 			}
 		}
 	}
-	leak.Data = fmt.Sprintf("Databases: %d, document count: %d, size: %s\n",
-		leak.Dataset.Collections, leak.Dataset.Rows, utils.HumanByteCount(leak.Dataset.Size)) +
-		leak.Data
-	return leak, true
+	event.Summary = fmt.Sprintf("Databases: %d, document count: %d, size: %s\n",
+		event.Leak.Dataset.Collections, event.Leak.Dataset.Rows, utils.HumanByteCount(event.Leak.Dataset.Size)) +
+		event.Summary
+	return true
 }
 
 // Check if data accessible or if only the schema is exposed

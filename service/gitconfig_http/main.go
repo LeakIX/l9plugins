@@ -35,19 +35,19 @@ func (GitConfigHttpPlugin) GetName() string {
 func (GitConfigHttpPlugin) GetStage() string {
 	return "open"
 }
-func (plugin GitConfigHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin GitConfigHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
 	if !getGitConfigRequest.Equal(request) || response.Response.StatusCode != 200 {
-		return leak, false
+		return false
 	}
 	gitConfig, err := ini.ShadowLoad(response.Body)
 	if err != nil {
-		return leak, false
+		return false
 	}
 	if section := gitConfig.Section(`remote "origin"`); section.HasKey("url") {
-		leak.Data += string(response.Body)
-		leak.Dataset.Files++
-		leak.Dataset.Size = int64(len(response.Body))
-		return leak, true
+		event.Summary += string(response.Body)
+		event.Leak.Dataset.Files++
+		event.Leak.Dataset.Size = int64(len(response.Body))
+		return true
 	}
-	return leak, false
+	return false
 }

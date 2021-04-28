@@ -36,11 +36,9 @@ func (MongoOpenPlugin) GetStage() string {
 	return l9format.STAGE_OPEN
 }
 
-func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
-	leak.Severity = l9format.SEVERITY_HIGH
-	leak.Type = "open_database"
-	leak.Data = ""
-	hasLeak = false
+func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
+	event.Leak.Severity = l9format.SEVERITY_HIGH
+	event.Leak.Type = "open_database"
 	//Build client
 	deadline, hasDeadline := ctx.Deadline()
 	mongoUrl := fmt.Sprintf("mongodb://%s/", net.JoinHostPort(event.Ip, event.Port))
@@ -50,7 +48,8 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	cs, err := connstring.ParseAndValidate(mongoUrl)
 	if err != nil {
 		log.Println(err)
-		return leak, hasLeak
+		event.Summary += err.Error() + "\n"
+		return false
 	}
 	if hasDeadline {
 		cs.ConnectTimeout = deadline.Sub(time.Now())
@@ -58,14 +57,13 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	tp, err := topology.New(topology.WithConnString(func(connstring.ConnString) connstring.ConnString { return cs }))
 	if err != nil {
 		log.Println(err)
-		leak.Data += err.Error() + "\n"
-		return leak, hasLeak
+		return false
 	}
 	err = tp.Connect()
 	if err != nil {
 		log.Println(err)
-		leak.Data += err.Error() + "\n"
-		return leak, hasLeak
+		event.Summary += err.Error() + "\n"
+		return false
 	}
 	defer tp.Disconnect(ctx)
 	// List collections
@@ -73,31 +71,32 @@ func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	err = op.Execute(ctx)
 	if err != nil {
 		log.Println(err)
-		leak.Data += err.Error() + "\n"
-		return leak, hasLeak
+		event.Summary += err.Error() + "\n"
+		return false
 	}
 	cursor, err := op.Result(driver.CursorOptions{BatchSize: 20})
 	if err != nil {
 		log.Println(err)
-		leak.Data += err.Error() + "\n"
-		return leak, hasLeak
+		event.Summary += err.Error() + "\n"
+		return false
 	}
 	for cursor.Next(ctx) {
 		documents, err := cursor.Batch().Documents()
 		if err != nil {
-			return leak, hasLeak
+			event.Summary += err.Error() + "\n"
+			return false
 		}
 		for _, document := range documents {
-			leak.Dataset.Collections++
-			leak.Data += fmt.Sprintf("Found collection %s\n", document.Lookup("name").String())
+			event.Leak.Dataset.Collections++
+			event.Summary += fmt.Sprintf("Found collection %s\n", document.Lookup("name").String())
 		}
-		if leak.Dataset.Collections > 128 {
+		if event.Leak.Dataset.Collections > 128 {
 			break
 		}
 	}
-	if leak.Dataset.Collections > 0 {
-		hasLeak = true
-		leak.Data = fmt.Sprintf("Found %d collections:\n%s", leak.Dataset.Collections, leak.Data)
+	if event.Leak.Dataset.Collections > 0 {
+		event.Summary = fmt.Sprintf("Found %d collections:\n%s", event.Leak.Dataset.Collections, event.Summary)
+		return true
 	}
-	return leak, hasLeak
+	return false
 }

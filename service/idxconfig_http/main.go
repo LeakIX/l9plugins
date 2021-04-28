@@ -37,25 +37,25 @@ func (IdxConfigPlugin) GetName() string {
 func (IdxConfigPlugin) GetStage() string {
 	return "open"
 }
-func (plugin IdxConfigPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (leak l9format.L9LeakEvent, hasLeak bool) {
+func (plugin IdxConfigPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) ( hasLeak bool) {
 	if !idxConfigRequest.Equal(request) || response.Response.StatusCode != 200 || response.Document == nil {
-		return leak, false
+		return false
 	}
 	if strings.HasPrefix(response.Document.Find("title").Text(), "Index of /") {
 		browser := IndexOfBrowser.NewBrowser(event.Url())
 		log.Println(event.Url())
 		files, err := browser.Ls()
 		if err != nil {
-			return leak, false
+			return false
 		}
 		for _, file := range files {
-			leak.Data += "Found " + file.Name + "\n"
-			leak.Dataset.Files++
-			leak.Dataset.Infected = true
+			event.Summary += "Found " + file.Name + "\n"
+			event.Leak.Dataset.Files++
+			event.Leak.Dataset.Infected = true
 		}
 		if len(files) > 0 {
-			return leak, true
+			return  true
 		}
 	}
-	return leak, false
+	return false
 }

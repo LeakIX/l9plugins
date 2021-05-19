@@ -31,7 +31,7 @@ func (LaravelTelescopeHttpPlugin) GetStage() string {
 	return "open"
 }
 func (plugin LaravelTelescopeHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) ( hasLeak bool) {
-	if !getGitConfigRequest.Equal(request) || response.Response.StatusCode != 200 || response.Document == nil {
+	if !getTelescopeRequest.Equal(request) || response.Response.StatusCode != 200 || response.Document == nil {
 		return  false
 	}
 	if response.Document.Find("title").Text() == "Telescope" {

@@ -21,7 +21,7 @@ var getConfigJson = l9format.WebPluginRequest{
 }
 
 func (ConfigJsonHttp) GetRequests() []l9format.WebPluginRequest {
-	return []l9format.WebPluginRequest{getServerStatus}
+	return []l9format.WebPluginRequest{getConfigJson}
 }
 
 func (ConfigJsonHttp) GetName() string {

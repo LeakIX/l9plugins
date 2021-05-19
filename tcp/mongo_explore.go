@@ -17,10 +17,6 @@ type MongoSchemaPlugin struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.ServicePluginInterface {
-	return MongoSchemaPlugin{}
-}
-
 func (MongoSchemaPlugin) GetVersion() (int, int, int) {
 	return 0, 1, 1
 }

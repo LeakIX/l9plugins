@@ -9,10 +9,6 @@ type DotEnvHttpPlugin struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.WebPluginInterface {
-	return DotEnvHttpPlugin{}
-}
-
 func (DotEnvHttpPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }

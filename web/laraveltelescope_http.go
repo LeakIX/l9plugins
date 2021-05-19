@@ -8,15 +8,11 @@ type LaravelTelescopeHttpPlugin struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.WebPluginInterface {
-	return LaravelTelescopeHttpPlugin{}
-}
-
 func (LaravelTelescopeHttpPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }
 
-var getGitConfigRequest = l9format.WebPluginRequest{
+var getTelescopeRequest = l9format.WebPluginRequest{
 		Method: "GET",
 		Path: "/telescope/requests",
 		Headers: map[string]string{},
@@ -24,7 +20,7 @@ var getGitConfigRequest = l9format.WebPluginRequest{
 }
 
 func (LaravelTelescopeHttpPlugin) GetRequests() []l9format.WebPluginRequest {
-	return []l9format.WebPluginRequest{getGitConfigRequest}
+	return []l9format.WebPluginRequest{getTelescopeRequest}
 }
 
 func (LaravelTelescopeHttpPlugin) GetName() string {

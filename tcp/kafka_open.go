@@ -13,10 +13,6 @@ import (
 type KafkaOpenPlugin struct {
 	l9format.ServicePluginBase
 }
-func main(){}
-func New() l9format.ServicePluginInterface {
-	return KafkaOpenPlugin{}
-}
 
 func (KafkaOpenPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1

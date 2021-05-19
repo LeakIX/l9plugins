@@ -9,10 +9,6 @@ type GitConfigHttpPlugin struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.WebPluginInterface {
-	return GitConfigHttpPlugin{}
-}
-
 func (GitConfigHttpPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }

@@ -16,13 +16,6 @@ type MysqlSchemaPlugin struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.ServicePluginInterface {
-	plugin := MysqlSchemaPlugin{}
-	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
-		return plugin.DialContext(ctx, "tcp", remoteAddr)
-	})
-	return plugin
-}
 
 func (MysqlSchemaPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1
@@ -41,6 +34,7 @@ func (MysqlSchemaPlugin) GetStage() string {
 }
 
 func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) ( hasLeak bool) {
+	plugin.RegisterMysql()
 	if len(event.Service.Credentials.Username) < 1 {
 		log.Printf("No credentials found for %s:%s", net.JoinHostPort(event.Host, event.Port))
 		return false
@@ -115,4 +109,17 @@ func (MysqlSchemaPlugin) GetRansomNote(ctx context.Context, databaseName, tableN
 		return note, true
 	}
 	return "", false
+}
+
+var mysqlRegistered bool
+
+// TODO : Add Init() in the interface
+func (plugin MysqlSchemaPlugin) RegisterMysql() {
+	if mysqlRegistered {
+		return
+	}
+	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
+		return plugin.DialContext(ctx, "tcp", remoteAddr)
+	})
+	mysqlRegistered = true
 }

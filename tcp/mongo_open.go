@@ -17,10 +17,6 @@ type MongoOpenPlugin struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.ServicePluginInterface {
-	return MongoOpenPlugin{}
-}
-
 // Implement interface :
 func (MongoOpenPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1

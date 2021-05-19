@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"github.com/LeakIX/l9format"
@@ -6,10 +6,6 @@ import (
 
 type ApacheStatusHttpPlugin struct {
 	l9format.ServicePluginBase
-}
-
-func New() l9format.WebPluginInterface {
-	return ApacheStatusHttpPlugin{}
 }
 
 func (ApacheStatusHttpPlugin) GetVersion() (int, int, int) {

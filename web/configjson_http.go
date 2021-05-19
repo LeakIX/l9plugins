@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"encoding/json"
@@ -9,15 +9,11 @@ type ConfigJsonHttp struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.WebPluginInterface {
-	return ConfigJsonHttp{}
-}
-
 func (ConfigJsonHttp) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }
 
-var getServerStatus = l9format.WebPluginRequest{
+var getConfigJson = l9format.WebPluginRequest{
 		Method: "GET",
 		Path: "/config.json",
 		Headers: map[string]string{},

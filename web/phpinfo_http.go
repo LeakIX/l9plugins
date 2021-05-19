@@ -1,4 +1,4 @@
-package main
+package web
 
 import (
 	"github.com/LeakIX/l9format"

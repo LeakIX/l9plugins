@@ -1,4 +1,4 @@
-package main
+package tcp
 
 import (
 	"bytes"
@@ -15,10 +15,6 @@ import (
 
 type CouchDbOpenPlugin struct {
 	l9format.ServicePluginBase
-}
-
-func New() l9format.ServicePluginInterface {
-	return CouchDbOpenPlugin{}
 }
 
 func (CouchDbOpenPlugin) GetVersion() (int, int, int) {

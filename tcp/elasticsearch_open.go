@@ -7,7 +7,6 @@ import (
 	"github.com/LeakIX/l9format"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	url2 "net/url"
 	"strconv"
@@ -37,7 +36,7 @@ func (ElasticSearchOpenPlugin) GetStage() string {
 
 // Get info
 func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
-	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip, event.Port))
+	log.Printf("Discovering %s ...", event.Url())
 	url := "/_nodes"
 	method := "GET"
 	// Requires deep-http from l9tcpid
@@ -58,13 +57,8 @@ func (plugin ElasticSearchOpenPlugin) Run(ctx context.Context, event *l9format.L
 	} else {
 		event.Service.Software.Name = "Elasticsearch"
 	}
-
-	scheme := "http"
-	if event.HasTransport("tls") {
-		scheme = "https"
-	}
-	req, err := http.NewRequest(method, fmt.Sprintf("%s://%s:%s%s", scheme, event.Ip, event.Port, url), nil)
-	req.Header["User-Agent"] = []string{"l9plugin-ElasticSearchOpenPlugin/0.1.1 (+https://leakix.net/)"}
+	req, err := http.NewRequest(method, fmt.Sprintf("%s%s", event.Url(), url), nil)
+	req.Header["User-Agent"] = []string{"l9plugin-ElasticSearchOpenPlugin/v1.0.0 (+https://leakix.net/)"}
 	req.Header["kbn-xsrf"] = []string{"true"}
 	if len(event.Service.Software.Version) > 3 && event.Protocol == "kibana" {
 		req.Header["kbn-version"] = []string{event.Service.Software.Version}

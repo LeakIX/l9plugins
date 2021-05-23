@@ -8,13 +8,11 @@ import (
 	"github.com/LeakIX/l9format/utils"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	url2 "net/url"
 	"strconv"
 	"strings"
 )
-
 type ElasticSearchExplorePlugin struct {
 	l9format.ServicePluginBase
 }
@@ -35,11 +33,14 @@ func (ElasticSearchExplorePlugin) GetName() string {
 func (ElasticSearchExplorePlugin) GetStage() string {
 	return "explore"
 }
+
+var ElasticSearchExplorePluginUA = "l9plugin-ElasticSearchExplorePlugin/v1.0.0 (+https://leakix.net/)"
+
 // Get info
 func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
-	log.Printf("Discovering http://%s ...", net.JoinHostPort(event.Ip,event.Port))
-	url := "/_cat/indices?format=json&bytes=b"
-	ransonUrl := "/%s/_search?size=1"
+	log.Printf("Discovering %s ...", event.Url())
+	path := "/_cat/indices?format=json&bytes=b"
+	ransomPath := "/%s/_search?size=1"
 	method := "GET"
 	if event.Protocol == "kibana" {
 		majorVersion := 0
@@ -48,21 +49,21 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 			majorVersion, _ = strconv.Atoi(versionSplit[0])
 		}
 		method= "POST"
-		url = "/api/console/proxy?path=" + url2.QueryEscape("/_cat/indices?format=json&bytes=b") + "&method=GET"
-		ransonUrl = "/api/console/proxy?path=/%s/_search" + url2.QueryEscape("?size=1") + "&method=POST"
+		path = "/api/console/proxy?path=" + url2.QueryEscape("/_cat/indices?format=json&bytes=b") + "&method=GET"
+		ransomPath = "/api/console/proxy?path=/%s/_search" + url2.QueryEscape("?size=1") + "&method=POST"
 		if majorVersion != 0 && majorVersion  < 5{
 			method = "GET"
-			url = "/elasticsearch/_cat/indices?format=json&bytes=b"
-			ransonUrl = "/elasticsearch/%s/_search?size=1"
+			path = "/elasticsearch/_cat/indices?format=json&bytes=b"
+			ransomPath = "/elasticsearch/%s/_search?size=1"
 		}
 		event.Summary += "Through Kibana endpoint\n"
 	}
-	scheme := "http"
-	if event.HasTransport("tls"){
-		scheme = "https"
+	req, err := http.NewRequest(method, fmt.Sprintf("%s%s", event.Url(), path), nil)
+	if err != nil {
+		log.Println(err)
+		return false
 	}
-	req, err := http.NewRequest(method, fmt.Sprintf("%s://%s%s", scheme, net.JoinHostPort(event.Ip,event.Port), url), nil)
-	req.Header["User-Agent"] = []string{"l9plugin-ElasticSearchExplorePlugin/0.1.0 (+https://leakix.net/)"}
+	req.Header["User-Agent"] = []string{ElasticSearchExplorePluginUA}
 	req.Header["kbn-xsrf"] = []string{"true"}
 	if len(event.Service.Software.Version) > 3 {
 		req.Header["kbn-version"] = []string{event.Service.Software.Version}
@@ -94,7 +95,6 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		return false
 	}
 	log.Printf("Found %d indices on ES endpoint", len(esReply))
-
 	for _, esIndex := range esReply {
 		if indexSize, err := strconv.ParseInt(esIndex.IndexSize, 10, 64); err == nil {
 			event.Summary += fmt.Sprintf("Found index %s with %s documents (%s)\n", esIndex.Name, esIndex.DocCount, utils.HumanByteCount(indexSize))
@@ -111,7 +111,7 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		if strings.Contains(esIndex.Name, "meow")  || strings.Contains(esIndex.Name, "hello") ||
 			(strings.HasPrefix(esIndex.Name, "read") && strings.HasSuffix(esIndex.Name, "me"))  {
 			event.Leak.Dataset.Infected = true
-			if ransomNote, found := plugin.GetRansomNote(ctx, fmt.Sprintf(ransonUrl, esIndex.Name), event); found {
+			if ransomNote, found := plugin.GetRansomNote(ctx, fmt.Sprintf(ransomPath, esIndex.Name), event); found {
 				event.Leak.Dataset.RansomNotes = append(event.Leak.Dataset.RansomNotes, ransomNote)
 			}
 
@@ -125,12 +125,8 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 }
 
 func (plugin ElasticSearchExplorePlugin) GetRansomNote(ctx context.Context, url string, event *l9format.L9Event) (ransomNote string, found bool) {
-	scheme := "http"
-	if event.HasTransport("tls"){
-		scheme = "https"
-	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s://%s%s", scheme, net.JoinHostPort(event.Ip,event.Port), url), nil)
-	req.Header["User-Agent"] = []string{"l9plugin-ElasticSearchExplorePlugin/0.1.0 (+https://leakix.net/)"}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", event.Url(), url), nil)
+	req.Header["User-Agent"] = []string{ElasticSearchExplorePluginUA}
 	req.Header["kbn-xsrf"] = []string{"true"}
 	if len(event.Service.Software.Version) > 3 {
 		req.Header["kbn-version"] = []string{event.Service.Software.Version}

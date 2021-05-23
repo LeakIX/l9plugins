@@ -14,15 +14,13 @@ func (PhpInfoHttpPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }
 
-var getInfoPhpRequest = l9format.WebPluginRequest{
+func (PhpInfoHttpPlugin) GetRequests() []l9format.WebPluginRequest {
+	return []l9format.WebPluginRequest{{
 		Method: "GET",
 		Path: "/info.php",
 		Headers: map[string]string{},
 		Body:[]byte(""),
-}
-
-func (PhpInfoHttpPlugin) GetRequests() []l9format.WebPluginRequest {
-	return []l9format.WebPluginRequest{getInfoPhpRequest}
+	}}
 }
 
 func (PhpInfoHttpPlugin) GetName() string {
@@ -33,7 +31,7 @@ func (PhpInfoHttpPlugin) GetStage() string {
 	return "open"
 }
 func (plugin PhpInfoHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) bool {
-	if !getInfoPhpRequest.Equal(request) || response.Response.StatusCode != 200 || response.Document == nil {
+	if !request.EqualAny(plugin.GetRequests()) || response.Response.StatusCode != 200 || response.Document == nil {
 		return false
 	}
 	event.Summary = "Found PHP info page:\n"

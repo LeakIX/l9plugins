@@ -13,15 +13,13 @@ func (ConfigJsonHttp) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }
 
-var getConfigJson = l9format.WebPluginRequest{
+func (ConfigJsonHttp) GetRequests() []l9format.WebPluginRequest {
+	return []l9format.WebPluginRequest{{
 		Method: "GET",
 		Path: "/config.json",
 		Headers: map[string]string{},
 		Body:[]byte(""),
-}
-
-func (ConfigJsonHttp) GetRequests() []l9format.WebPluginRequest {
-	return []l9format.WebPluginRequest{getConfigJson}
+	}}
 }
 
 func (ConfigJsonHttp) GetName() string {
@@ -32,7 +30,7 @@ func (ConfigJsonHttp) GetStage() string {
 	return "open"
 }
 func (plugin ConfigJsonHttp) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
-	if !getServerStatus.Equal(request) || response.Response.StatusCode != 200 {
+	if !request.EqualAny(plugin.GetRequests())|| response.Response.StatusCode != 200 {
 		return false
 	}
 	var reply CodeJsonReply

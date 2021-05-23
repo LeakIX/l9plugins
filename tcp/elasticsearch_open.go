@@ -1,4 +1,4 @@
-package main
+package tcp
 
 import (
 	"context"
@@ -18,9 +18,6 @@ type ElasticSearchOpenPlugin struct {
 	l9format.ServicePluginBase
 }
 
-func New() l9format.ServicePluginInterface {
-	return ElasticSearchOpenPlugin{}
-}
 
 func (ElasticSearchOpenPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1

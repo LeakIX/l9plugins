@@ -1,4 +1,4 @@
-package main
+package tcp
 
 import (
 	"context"
@@ -11,10 +11,6 @@ import (
 
 type RedisOpenPlugin struct {
 	l9format.ServicePluginBase
-}
-
-func New() l9format.ServicePluginInterface {
-	return RedisOpenPlugin{}
 }
 
 func (RedisOpenPlugin) GetVersion() (int, int, int) {

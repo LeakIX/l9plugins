@@ -1,4 +1,4 @@
-package main
+package tcp
 
 import (
 	"context"
@@ -12,10 +12,6 @@ import (
 
 type KafkaOpenPlugin struct {
 	l9format.ServicePluginBase
-}
-func main(){}
-func New() l9format.ServicePluginInterface {
-	return KafkaOpenPlugin{}
 }
 
 func (KafkaOpenPlugin) GetVersion() (int, int, int) {

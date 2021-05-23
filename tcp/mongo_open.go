@@ -1,4 +1,4 @@
-package main
+package tcp
 
 import (
 	"context"
@@ -15,10 +15,6 @@ import (
 
 type MongoOpenPlugin struct {
 	l9format.ServicePluginBase
-}
-
-func New() l9format.ServicePluginInterface {
-	return MongoOpenPlugin{}
 }
 
 // Implement interface :

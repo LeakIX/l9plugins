@@ -1,4 +1,4 @@
-package main
+package tcp
 
 import (
 	"context"
@@ -13,14 +13,6 @@ import (
 
 type MysqlWeakPlugin struct {
 	l9format.ServicePluginBase
-}
-
-func New() l9format.ServicePluginInterface {
-	plugin := MysqlWeakPlugin{}
-	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
-		return plugin.DialContext(ctx, "tcp", remoteAddr)
-	})
-	return plugin
 }
 
 func (MysqlWeakPlugin) GetVersion() (int, int, int) {
@@ -42,6 +34,7 @@ func (MysqlWeakPlugin) GetStage() string {
 var verQueryString = "select @@version_comment, @@version, concat(@@version_compile_os, \" \", @@version_compile_machine);"
 
 func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) bool {
+	plugin.RegisterMysql()
 	for _, username := range usernames {
 		for _, password := range passwords {
 			dsn := fmt.Sprintf("%s:%s@l9tcp(%s)/information_schema?readTimeout=3s&timeout=3s&writeTimeout=3s", username, password, net.JoinHostPort(event.Ip, event.Port))
@@ -93,4 +86,15 @@ var passwords = []string{
 	"sql",
 	"123456",
 	"admin",
+}
+
+
+func (plugin MysqlWeakPlugin) RegisterMysql() {
+	if mysqlRegistered {
+		return
+	}
+	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
+		return plugin.DialContext(ctx, "tcp", remoteAddr)
+	})
+	mysqlRegistered = true
 }

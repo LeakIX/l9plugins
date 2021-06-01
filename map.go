@@ -27,6 +27,7 @@ var webPlugins = []l9format.WebPluginInterface{
 	web.IdxConfigPlugin{},
 	web.LaravelTelescopeHttpPlugin{},
 	web.PhpInfoHttpPlugin{},
+	web.FirebaseHttpPlugin{},
 }
 
 func GetTcpPlugins() []l9format.ServicePluginInterface {

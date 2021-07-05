@@ -34,7 +34,6 @@ func (MysqlSchemaPlugin) GetStage() string {
 }
 
 func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) ( hasLeak bool) {
-	plugin.RegisterMysql()
 	if len(event.Service.Credentials.Username) < 1 {
 		log.Printf("No credentials found for %s:%s", net.JoinHostPort(event.Host, event.Port))
 		return false
@@ -113,13 +112,10 @@ func (MysqlSchemaPlugin) GetRansomNote(ctx context.Context, databaseName, tableN
 
 var mysqlRegistered bool
 
-// TODO : Add Init() in the interface
-func (plugin MysqlSchemaPlugin) RegisterMysql() {
-	if mysqlRegistered {
-		return
-	}
+func (plugin MysqlSchemaPlugin) Init() error {
 	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
 		return plugin.DialContext(ctx, "tcp", remoteAddr)
 	})
-	mysqlRegistered = true
+	log.Println("Registered l9tcp mysql dialer")
+	return nil
 }

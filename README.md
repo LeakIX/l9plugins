@@ -26,7 +26,7 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |redis_open|redis|open|Connects and checks for open instance|
 |kafka_open|kafka}|open|Connects and lists topics|
 |couchdb_open|couchdb|open|Connects and list databases, sizes|
-|firebase_http|firebase|open|Connects to firebase and checks for `.json` files|@phretor
+|firebase_http|firebase|open|Connects to firebase and checks for `.json` files|@phretor|
 
 ### Creating service plugins
 

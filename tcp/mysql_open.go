@@ -34,7 +34,6 @@ func (MysqlWeakPlugin) GetStage() string {
 var verQueryString = "select @@version_comment, @@version, concat(@@version_compile_os, \" \", @@version_compile_machine);"
 
 func (plugin MysqlWeakPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) bool {
-	plugin.RegisterMysql()
 	for _, username := range usernames {
 		for _, password := range passwords {
 			dsn := fmt.Sprintf("%s:%s@l9tcp(%s)/information_schema?readTimeout=3s&timeout=3s&writeTimeout=3s", username, password, net.JoinHostPort(event.Ip, event.Port))
@@ -89,12 +88,10 @@ var passwords = []string{
 }
 
 
-func (plugin MysqlWeakPlugin) RegisterMysql() {
-	if mysqlRegistered {
-		return
-	}
+func (plugin MysqlWeakPlugin) Init() error {
 	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
 		return plugin.DialContext(ctx, "tcp", remoteAddr)
 	})
-	mysqlRegistered = true
+	log.Println("Registered l9tcp mysql dialer")
+	return nil
 }

@@ -7,6 +7,8 @@ github.com/LeakIX/l9format v1.0.0-beta.2 h1:TDdkVHR1bSgZP4RoNw9owEDqzR4vwJnc904W
 github.com/LeakIX/l9format v1.0.0-beta.2/go.mod h1:eKQn32c5PgUM7806Un2v6WTSmJcdcixed+cRHsPEp0k=
 github.com/LeakIX/l9format v1.0.0 h1:zHqGvnwvr5iuI55nCSQbmVlPdiEfiNrjn890MMlX2rk=
 github.com/LeakIX/l9format v1.0.0/go.mod h1:eKQn32c5PgUM7806Un2v6WTSmJcdcixed+cRHsPEp0k=
+github.com/LeakIX/l9format v1.2.0-alpha.3 h1:sAWpN52Jo2qcH5tG4aunpefZ1Sd8bWFxJFuzW++Wk2k=
+github.com/LeakIX/l9format v1.2.0-alpha.3/go.mod h1:eKQn32c5PgUM7806Un2v6WTSmJcdcixed+cRHsPEp0k=
 github.com/PuerkitoBio/goquery v1.6.1 h1:FgjbQZKl5HTmcn4sKBgvx8vv63nhyhIpv7lJpFGCWpk=
 github.com/PuerkitoBio/goquery v1.6.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/Shopify/sarama v1.28.0 h1:lOi3SfE6OcFlW9Trgtked2aHNZ2BIG/d6Do+PEUAqqM=

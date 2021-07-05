@@ -112,9 +112,10 @@ func (MysqlSchemaPlugin) GetRansomNote(ctx context.Context, databaseName, tableN
 
 var mysqlRegistered bool
 
-func (plugin MysqlSchemaPlugin) Init() {
+func (plugin MysqlSchemaPlugin) Init() error {
 	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
 		return plugin.DialContext(ctx, "tcp", remoteAddr)
 	})
 	log.Println("Registered l9tcp mysql dialer")
+	return nil
 }

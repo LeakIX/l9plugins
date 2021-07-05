@@ -88,9 +88,10 @@ var passwords = []string{
 }
 
 
-func (plugin MysqlWeakPlugin) Init() {
+func (plugin MysqlWeakPlugin) Init() error {
 	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
 		return plugin.DialContext(ctx, "tcp", remoteAddr)
 	})
 	log.Println("Registered l9tcp mysql dialer")
+	return nil
 }

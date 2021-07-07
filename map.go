@@ -28,6 +28,7 @@ var webPlugins = []l9format.WebPluginInterface{
 	web.LaravelTelescopeHttpPlugin{},
 	web.PhpInfoHttpPlugin{},
 	web.FirebaseHttpPlugin{},
+	web.WpUserEnumHttp{},
 }
 
 func GetTcpPlugins() []l9format.ServicePluginInterface {

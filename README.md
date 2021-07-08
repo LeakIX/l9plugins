@@ -27,6 +27,7 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |kafka_open|kafka}|open|Connects and lists topics|
 |couchdb_open|couchdb|open|Connects and list databases, sizes|
 |firebase_http|firebase|open|Connects to firebase and checks for `.json` files|@phretor|
+|wpenum_http|http|http|Enumerates Wordpress users from CVE-2017-5487|
 
 ### Creating service plugins
 

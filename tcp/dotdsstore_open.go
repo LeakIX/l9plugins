@@ -81,6 +81,9 @@ func (plugin DotDsStoreOpenPlugin) getDsStoreFiles(ctx context.Context, event *l
 		return
 	}
 	for _, filename := range filenames {
+		if filename == "." {
+			continue
+		}
 		if _, found := history[filename]; !found {
 			history[filename] = true
 		} else {

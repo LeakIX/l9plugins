@@ -24,7 +24,7 @@ func (FirebaseHttpPlugin) GetRequests() []l9format.WebPluginRequest {
 }
 
 func (FirebaseHttpPlugin) GetName() string {
-	return "DotEnvConfigPlugin"
+	return "FirebaseHttpPlugin"
 }
 
 func (FirebaseHttpPlugin) GetStage() string {

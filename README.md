@@ -28,7 +28,7 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |couchdb_open|couchdb|open|Connects and list databases, sizes|
 |firebase_http|firebase|open|Connects to firebase and checks for `.json` files|@phretor|
 |wpenum_http|http|http|Enumerates Wordpress users from CVE-2017-5487|
-
+|dotdsstore_open|http|open|Reads `.DS_Store` to enumerate files and directories on target|
 ### Creating service plugins
 
 Checkout the [l9plugin documentation](https://github.com/LeakIX/l9format/blob/master/l9plugin.md) on how to create your plugins.

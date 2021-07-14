@@ -17,6 +17,7 @@ var tcpPlugins = []l9format.ServicePluginInterface{
 	tcp.MysqlSchemaPlugin{},
 	tcp.RedisOpenPlugin{},
 	tcp.SSHOpenPlugin{},
+	tcp.DotDsStoreOpenPlugin{},
 }
 
 var webPlugins = []l9format.WebPluginInterface{

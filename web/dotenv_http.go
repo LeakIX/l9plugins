@@ -3,6 +3,8 @@ package web
 import (
 	"github.com/LeakIX/l9format"
 	"github.com/joho/godotenv"
+	"regexp"
+	"strings"
 )
 
 type DotEnvHttpPlugin struct {
@@ -40,10 +42,35 @@ func (plugin DotEnvHttpPlugin) Verify(request l9format.WebPluginRequest, respons
 	if err != nil {
 		return false
 	}
-
 	if len(envConfig) > 1 && len(envConfig) < 2048 {
 		event.Summary = string(response.Body)
+		event.Leak.Severity = l9format.SEVERITY_MEDIUM
+		if len(checkSensitiveKeyPatterns(envConfig)) > 0 {
+			event.Leak.Severity = l9format.SEVERITY_HIGH
+		}
 		return true
 	}
 	return false
+}
+
+var sensitiveKeyPatterns = []string{
+	"^aws_.*",
+	".*_password$",
+	".*_key$",
+	"^mysql_.*",
+	".*secret.*",
+	".*private.*",
+}
+
+func checkSensitiveKeyPatterns(config map[string]string) (matches []string) {
+	for configKey, configValue := range config {
+		for _, sensitiveKeyPattern := range sensitiveKeyPatterns {
+			if match, err := regexp.MatchString(sensitiveKeyPattern, strings.ToLower(configKey)) ; err == nil && match && len(configValue) > 0{
+				matches = append(matches, configKey)
+				// Don't match 2 patterns, proceed to next file
+				break
+			}
+		}
+	}
+	return matches
 }

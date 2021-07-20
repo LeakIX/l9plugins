@@ -64,7 +64,7 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 		event.Leak.Dataset.Rows += recordCount
 		event.Leak.Dataset.Collections++
 		event.Leak.Dataset.Size += dataLength
-		if strings.Contains(strings.ToLower(tableName), "warning") {
+		if strings.Contains(strings.ToLower(tableName), "warning") || strings.HasPrefix(strings.ToLower(tableName), "readme_") || strings.HasPrefix(strings.ToLower(tableName), "recover_your_"){
 			event.Leak.Dataset.Infected = true
 			if ransomNote, found := plugin.GetRansomNote(ctx, databaseName, tableName ,event, db) ; found{
 				event.Leak.Dataset.RansomNotes = append(event.Leak.Dataset.RansomNotes, ransomNote)
@@ -77,6 +77,16 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 	event.Summary = fmt.Sprintf("Databases: %d, row count: %d, size: %s\n",
 		event.Leak.Dataset.Collections, event.Leak.Dataset.Rows, utils.HumanByteCount(event.Leak.Dataset.Size)) +
 		event.Summary
+	event.Leak.Severity = l9format.SEVERITY_MEDIUM
+	if event.Leak.Dataset.Infected {
+		event.Leak.Severity = l9format.SEVERITY_HIGH
+	}
+	if event.Leak.Dataset.Rows > 1000 {
+		event.Leak.Severity = l9format.SEVERITY_HIGH
+		if event.Leak.Dataset.Infected {
+			event.Leak.Severity = l9format.SEVERITY_CRITICAL
+		}
+	}
 	return true
 }
 

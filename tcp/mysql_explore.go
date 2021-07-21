@@ -64,7 +64,7 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 		event.Leak.Dataset.Rows += recordCount
 		event.Leak.Dataset.Collections++
 		event.Leak.Dataset.Size += dataLength
-		if strings.Contains(strings.ToLower(tableName), "warning") || strings.HasPrefix(strings.ToLower(tableName), "readme_") || strings.HasPrefix(strings.ToLower(tableName), "recover_your_"){
+		if strings.Contains(strings.ToLower(tableName), "warning") || strings.HasPrefix(strings.ToLower(tableName), "readme") || strings.HasPrefix(strings.ToLower(tableName), "recover_your_"){
 			event.Leak.Dataset.Infected = true
 			if ransomNote, found := plugin.GetRansomNote(ctx, databaseName, tableName ,event, db) ; found{
 				event.Leak.Dataset.RansomNotes = append(event.Leak.Dataset.RansomNotes, ransomNote)

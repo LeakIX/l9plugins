@@ -34,6 +34,7 @@ func (plugin ApacheStatusHttpPlugin) Verify(request l9format.WebPluginRequest, r
 	}
 	if response.Document.Find("title").Text() == "Apache Status" {
 		event.Summary = response.Document.Text()
+		event.Leak.Severity = l9format.SEVERITY_MEDIUM
 		return true
 	}
 	return false

@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -38,11 +39,42 @@ func (plugin DotDsStoreOpenPlugin) Run(ctx context.Context, event *l9format.L9Ev
 	if len(results) > 0 {
 		event.Summary = fmt.Sprintf("Found %d files trough .DS_Store spidering:\n\n", len(results))
 		event.Summary += strings.Join(results,"\n")
+		event.Leak.Severity = l9format.SEVERITY_LOW
+		if len(results) > 32 {
+			event.Leak.Severity = l9format.SEVERITY_MEDIUM
+		}
+		if len(checkSensitiveFilePatterns(results)) > 0 {
+			event.Leak.Severity = l9format.SEVERITY_HIGH
+		}
 		return true
 	}
 	return false
 }
 
+var sensitiveFilePatterns = []string{
+	".*back$",
+	".*backup$",
+	".*swp$",
+	".*sql$",
+	".*zip$",
+	".*gz$",
+	".*rar$",
+	".*7z$",
+	".*_history$",
+}
+
+func checkSensitiveFilePatterns(files []string) (matches []string) {
+	for _, file := range files {
+		for _, sensitiveFilePattern := range sensitiveFilePatterns {
+			if match, err := regexp.MatchString(sensitiveFilePattern, file) ; err == nil && match {
+				matches = append(matches, file)
+				// Don't match 2 patterns, proceed to next file
+				break
+			}
+		}
+	}
+	return matches
+}
 
 func (plugin DotDsStoreOpenPlugin) getDsStoreFiles(ctx context.Context, event *l9format.L9Event, rootUrl, path string) (results []string) {
 	history := make(map[string]bool)

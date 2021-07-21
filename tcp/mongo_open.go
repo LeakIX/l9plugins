@@ -33,7 +33,7 @@ func (MongoOpenPlugin) GetStage() string {
 }
 
 func (plugin MongoOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
-	event.Leak.Severity = l9format.SEVERITY_HIGH
+	event.Leak.Severity = l9format.SEVERITY_MEDIUM
 	event.Leak.Type = "open_database"
 	//Build client
 	deadline, hasDeadline := ctx.Deadline()

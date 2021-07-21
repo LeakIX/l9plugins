@@ -52,6 +52,7 @@ func (plugin ConfigJsonHttp) Verify(request l9format.WebPluginRequest, response 
 		return false
 	}
 	event.Summary = string(response.Body)
+	event.Leak.Severity = l9format.SEVERITY_LOW
 	return true
 }
 

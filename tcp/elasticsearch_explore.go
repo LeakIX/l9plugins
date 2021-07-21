@@ -120,6 +120,16 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 	event.Summary = fmt.Sprintf("Indices: %d, document count: %d, size: %s\n",
 		event.Leak.Dataset.Collections, event.Leak.Dataset.Rows, utils.HumanByteCount(event.Leak.Dataset.Size)) +
 		event.Summary
+	event.Leak.Severity = l9format.SEVERITY_MEDIUM
+	if event.Leak.Dataset.Infected {
+		event.Leak.Severity = l9format.SEVERITY_HIGH
+	}
+	if event.Leak.Dataset.Rows > 1000 {
+		event.Leak.Severity = l9format.SEVERITY_HIGH
+		if event.Leak.Dataset.Infected {
+			event.Leak.Severity = l9format.SEVERITY_CRITICAL
+		}
+	}
 	// Short leak, a second one will contain indices stats & co
 	return true
 }

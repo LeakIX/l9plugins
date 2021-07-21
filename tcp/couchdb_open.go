@@ -69,8 +69,10 @@ func (plugin CouchDbOpenPlugin) GetInfos(ctx context.Context, event *l9format.L9
 	isOpen := plugin.TestOpen(ctx, event)
 	if isOpen {
 		event.Summary += "Weak auth\n"
+		event.Leak.Severity = l9format.SEVERITY_MEDIUM
 	} else {
 		event.Summary += "Schema only\n"
+		event.Leak.Severity = l9format.SEVERITY_LOW
 	}
 	for _, dbNames := range plugin.chunkBy(dbList, 50) {
 		for _, dbInfo := range plugin.GetDatabaseInfo(ctx, event, dbNames) {
@@ -80,10 +82,19 @@ func (plugin CouchDbOpenPlugin) GetInfos(ctx context.Context, event *l9format.L9
 				event.Leak.Dataset.Size += dbInfo.Info.DiskSize
 			}
 			event.Summary += fmt.Sprintf("Found table %s with %d documents (%s)\n", dbInfo.Info.Name, dbInfo.Info.DocCount, utils.HumanByteCount(dbInfo.Info.DiskSize))
-			if strings.Contains(dbInfo.Info.Name, "read_me") || strings.Contains(dbInfo.Info.Name, "wegeturdb") || strings.Contains(dbInfo.Info.Name, "meow") {
+			if (strings.HasPrefix(dbInfo.Info.Name, "read") && strings.HasSuffix(dbInfo.Info.Name, "me")) || strings.Contains(dbInfo.Info.Name, "wegeturdb") || strings.Contains(dbInfo.Info.Name, "meow") {
 				event.Leak.Dataset.Infected = true
 			}
 		}
+	}
+	if event.Leak.Dataset.Rows > 1000 {
+		event.Leak.Severity = l9format.SEVERITY_HIGH
+		if event.Leak.Dataset.Infected {
+			event.Leak.Severity = l9format.SEVERITY_CRITICAL
+		}
+	}
+	if event.Leak.Dataset.Rows > 100000 {
+		event.Leak.Severity = l9format.SEVERITY_CRITICAL
 	}
 	event.Summary = fmt.Sprintf("Databases: %d, document count: %d, size: %s\n",
 		event.Leak.Dataset.Collections, event.Leak.Dataset.Rows, utils.HumanByteCount(event.Leak.Dataset.Size)) +

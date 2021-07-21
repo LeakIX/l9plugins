@@ -4,7 +4,7 @@ go 1.11
 
 require (
 	github.com/LeakIX/IndexOfBrowser v0.1.0
-	github.com/LeakIX/l9format v1.3.0
+	github.com/LeakIX/l9format v1.3.0-beta.2.0.20210714170127-87fd5502dcd8
 	github.com/PuerkitoBio/goquery v1.7.0
 	github.com/Shopify/sarama v1.29.1
 	github.com/aws/aws-sdk-go v1.39.2 // indirect

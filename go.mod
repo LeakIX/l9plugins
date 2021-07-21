@@ -5,7 +5,7 @@ go 1.11
 require (
 	github.com/LeakIX/IndexOfBrowser v0.1.0
 	github.com/LeakIX/l9format v1.3.0-beta.2.0.20210714170127-87fd5502dcd8
-	github.com/PuerkitoBio/goquery v1.7.0
+	github.com/PuerkitoBio/goquery v1.7.1
 	github.com/Shopify/sarama v1.29.1
 	github.com/aws/aws-sdk-go v1.39.2 // indirect
 	github.com/gehaxelt/ds_store v0.0.0-20210328175056-724e653cb546
@@ -19,6 +19,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.mongodb.org/mongo-driver v1.5.4
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
+	golang.org/x/net v0.0.0-20210716203947-853a461950ff // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	gopkg.in/ini.v1 v1.62.0

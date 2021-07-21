@@ -48,7 +48,7 @@ func (plugin DotEnvHttpPlugin) Verify(request l9format.WebPluginRequest, respons
 		if len(checkSensitiveKeyPatterns(envConfig)) > 0 {
 			event.Leak.Severity = l9format.SEVERITY_HIGH
 		}
-		if awsFakeKey, hasKey := envConfig["AWS_ACCESS_KEY_ID"]; hasKey && len(envConfig) == 3 && strings.HasSuffix("ASIAXM", awsFakeKey) {
+		if awsFakeKey, hasKey := envConfig["AWS_ACCESS_KEY_ID"]; hasKey && len(envConfig) == 3 && strings.HasSuffix( awsFakeKey, "ASIAXM") {
 			event.Leak.Severity = l9format.SEVERITY_LOW
 		}
 		return true

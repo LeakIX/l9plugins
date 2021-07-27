@@ -43,7 +43,7 @@ func (plugin GitConfigHttpPlugin) Verify(request l9format.WebPluginRequest, resp
 		event.Leak.Dataset.Files++
 		event.Leak.Dataset.Size = int64(len(response.Body))
 		event.Leak.Severity = l9format.SEVERITY_MEDIUM
-		if gitUrl, err := url.Parse(section.Body()); err == nil && gitUrl != nil && gitUrl.User != nil && len(gitUrl.User.Username()) > 0 {
+		if gitUrl, err := url.Parse(section.Key("url").Value()); err == nil && gitUrl != nil && gitUrl.User != nil && len(gitUrl.User.Username()) > 0 {
 			event.Leak.Severity = l9format.SEVERITY_HIGH
 			if gitPassword, hasPassword := gitUrl.User.Password(); hasPassword && len(gitPassword) > 0 {
 				event.Leak.Severity = l9format.SEVERITY_CRITICAL

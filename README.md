@@ -27,7 +27,7 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |kafka_open|kafka}|open|Connects and lists topics|
 |couchdb_open|couchdb|open|Connects and list databases, sizes|
 |firebase_http|firebase|open|Connects to firebase and checks for `.json` files|@phretor|
-
+|confluence_version|http|http|Scans confluence for vulnerable versions|@HaboubiAnis|
 ### Creating service plugins
 
 Checkout the [l9plugin documentation](https://github.com/LeakIX/l9format/blob/master/l9plugin.md) on how to create your plugins.

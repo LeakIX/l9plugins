@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/LeakIX/l9format"
 )
@@ -31,7 +32,7 @@ func (FirebaseHttpPlugin) GetStage() string {
 	return "open"
 }
 func (plugin FirebaseHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
-	if !request.EqualAny(plugin.GetRequests())|| response.Response.StatusCode != 200 {
+	if !request.EqualAny(plugin.GetRequests())|| response.Response.StatusCode != 200  || !strings.HasSuffix(event.Host, ".firebaseio.com") {
 		return false
 	}
 	if len(response.Body) > 0 && response.Body[0] == '<' {

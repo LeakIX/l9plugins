@@ -3,6 +3,8 @@ github.com/LeakIX/IndexOfBrowser v0.1.0 h1:a4Ag35uwKGEYIkALBsxv5tAziqWfMsUKZhEw4
 github.com/LeakIX/IndexOfBrowser v0.1.0/go.mod h1:VHPdwGFIaDecI0h5T382sXKA0GngEOOxdqqpIA7NQGY=
 github.com/LeakIX/l9format v1.3.0-beta.2.0.20210714170127-87fd5502dcd8 h1:e1/TfBhreSDVs68/ZSHtOLFPJUBfoe+IeQ7IisCplXw=
 github.com/LeakIX/l9format v1.3.0-beta.2.0.20210714170127-87fd5502dcd8/go.mod h1:eKQn32c5PgUM7806Un2v6WTSmJcdcixed+cRHsPEp0k=
+github.com/LeakIX/l9format v1.3.0 h1:IrWuvYQ6ayEwf3oTTWG54D3oVfLApQDd0qyKdKK5mw8=
+github.com/LeakIX/l9format v1.3.0/go.mod h1:eKQn32c5PgUM7806Un2v6WTSmJcdcixed+cRHsPEp0k=
 github.com/PuerkitoBio/goquery v1.6.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/PuerkitoBio/goquery v1.7.1 h1:oE+T06D+1T7LNrn91B4aERsRIeCLJ/oPSa6xB9FPnz4=
 github.com/PuerkitoBio/goquery v1.7.1/go.mod h1:XY0pP4kfraEmmV1O7Uf6XyjoslwsneBbgeDjLYuN8xY=

@@ -4,7 +4,7 @@ go 1.11
 
 require (
 	github.com/LeakIX/IndexOfBrowser v0.1.0
-	github.com/LeakIX/l9format v1.3.0-beta.2.0.20210714170127-87fd5502dcd8
+	github.com/LeakIX/l9format v1.3.0
 	github.com/PuerkitoBio/goquery v1.7.1
 	github.com/Shopify/sarama v1.29.1
 	github.com/aws/aws-sdk-go v1.39.2 // indirect
@@ -12,7 +12,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/hashicorp/go-version v1.3.0 // indirect
+	github.com/hashicorp/go-version v1.3.0
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.13.1 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect

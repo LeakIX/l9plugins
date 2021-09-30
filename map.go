@@ -30,6 +30,7 @@ var webPlugins = []l9format.WebPluginInterface{
 	web.PhpInfoHttpPlugin{},
 	web.FirebaseHttpPlugin{},
 	web.WpUserEnumHttp{},
+	web.ConfluenceVersionIssue{},
 }
 
 func GetTcpPlugins() []l9format.ServicePluginInterface {

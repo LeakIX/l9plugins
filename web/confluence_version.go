@@ -1,4 +1,5 @@
 package web
+
 /*
  * Thanks to https://twitter.com/HaboubiAnis for pointers on this plugin.
  */
@@ -29,7 +30,7 @@ func (ConfluenceVersionIssue) GetStage() string {
 
 var ConfluenceRequest = l9format.WebPluginRequest{Method: "GET", Path: "/login.action"}
 
-func (plugin ConfluenceVersionIssue) GetRequests() []l9format.WebPluginRequest{
+func (plugin ConfluenceVersionIssue) GetRequests() []l9format.WebPluginRequest {
 	//No need to register requests, / is a default one
 	return []l9format.WebPluginRequest{
 		ConfluenceRequest,

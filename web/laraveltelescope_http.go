@@ -14,10 +14,10 @@ func (LaravelTelescopeHttpPlugin) GetVersion() (int, int, int) {
 
 func (LaravelTelescopeHttpPlugin) GetRequests() []l9format.WebPluginRequest {
 	return []l9format.WebPluginRequest{{
-		Method: "GET",
-		Path: "/telescope/requests",
+		Method:  "GET",
+		Path:    "/telescope/requests",
 		Headers: map[string]string{},
-		Body:[]byte(""),
+		Body:    []byte(""),
 	}}
 }
 
@@ -28,13 +28,13 @@ func (LaravelTelescopeHttpPlugin) GetName() string {
 func (LaravelTelescopeHttpPlugin) GetStage() string {
 	return "open"
 }
-func (plugin LaravelTelescopeHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) ( hasLeak bool) {
+func (plugin LaravelTelescopeHttpPlugin) Verify(request l9format.WebPluginRequest, response l9format.WebPluginResponse, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
 	if !request.EqualAny(plugin.GetRequests()) || response.Response.StatusCode != 200 || response.Document == nil {
-		return  false
+		return false
 	}
 	if response.Document.Find("title").Text() == "Telescope" {
 		event.Summary = "Laravel Telescope enabled at " + event.Url()
 		return true
 	}
-	return  false
+	return false
 }

@@ -40,7 +40,7 @@ func (plugin RedisOpenPlugin) Run(ctx context.Context, event *l9format.L9Event, 
 	_, err := client.Ping(ctx).Result()
 	if err != nil {
 		log.Println("Redis PING failed, leaving early : ", err)
-		return  false
+		return false
 	}
 	redisInfo, err := client.Info(ctx).Result()
 	if err != nil {

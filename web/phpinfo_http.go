@@ -16,10 +16,10 @@ func (PhpInfoHttpPlugin) GetVersion() (int, int, int) {
 
 func (PhpInfoHttpPlugin) GetRequests() []l9format.WebPluginRequest {
 	return []l9format.WebPluginRequest{{
-		Method: "GET",
-		Path: "/info.php",
+		Method:  "GET",
+		Path:    "/info.php",
 		Headers: map[string]string{},
-		Body:[]byte(""),
+		Body:    []byte(""),
 	}}
 }
 
@@ -41,7 +41,7 @@ func (plugin PhpInfoHttpPlugin) Verify(request l9format.WebPluginRequest, respon
 			if i == 0 {
 				return
 			}
-			event.Summary += strings.TrimSpace(selection.Find("td.e").Text()) + " = " +strings.TrimSpace(selection.Find("td.v").Text()) + "\n"
+			event.Summary += strings.TrimSpace(selection.Find("td.e").Text()) + " = " + strings.TrimSpace(selection.Find("td.v").Text()) + "\n"
 		})
 		return true
 	}

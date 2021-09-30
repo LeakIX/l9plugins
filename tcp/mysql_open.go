@@ -87,7 +87,6 @@ var passwords = []string{
 	"admin",
 }
 
-
 func (plugin MysqlWeakPlugin) Init() error {
 	mysql.RegisterDialContext("l9tcp", func(ctx context.Context, remoteAddr string) (net.Conn, error) {
 		return plugin.DialContext(ctx, "tcp", remoteAddr)

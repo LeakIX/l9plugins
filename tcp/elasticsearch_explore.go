@@ -13,17 +13,17 @@ import (
 	"strconv"
 	"strings"
 )
+
 type ElasticSearchExplorePlugin struct {
 	l9format.ServicePluginBase
 }
-
 
 func (ElasticSearchExplorePlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }
 
 func (ElasticSearchExplorePlugin) GetProtocols() []string {
-	return []string{"elasticsearch","kibana"}
+	return []string{"elasticsearch", "kibana"}
 }
 
 func (ElasticSearchExplorePlugin) GetName() string {
@@ -48,10 +48,10 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		if len(versionSplit) > 1 {
 			majorVersion, _ = strconv.Atoi(versionSplit[0])
 		}
-		method= "POST"
+		method = "POST"
 		path = "/api/console/proxy?path=" + url2.QueryEscape("/_cat/indices?format=json&bytes=b") + "&method=GET"
 		ransomPath = "/api/console/proxy?path=/%s/_search" + url2.QueryEscape("?size=1") + "&method=POST"
-		if majorVersion != 0 && majorVersion  < 5{
+		if majorVersion != 0 && majorVersion < 5 {
 			method = "GET"
 			path = "/elasticsearch/_cat/indices?format=json&bytes=b"
 			ransomPath = "/elasticsearch/%s/_search?size=1"
@@ -108,8 +108,8 @@ func (plugin ElasticSearchExplorePlugin) Run(ctx context.Context, event *l9forma
 		if indexSize, err := strconv.ParseInt(esIndex.IndexSize, 10, 64); err == nil {
 			event.Leak.Dataset.Size += indexSize
 		}
-		if strings.Contains(esIndex.Name, "meow")  || strings.Contains(esIndex.Name, "hello") ||
-			(strings.HasPrefix(esIndex.Name, "read") && strings.HasSuffix(esIndex.Name, "me"))  {
+		if strings.Contains(esIndex.Name, "meow") || strings.Contains(esIndex.Name, "hello") ||
+			(strings.HasPrefix(esIndex.Name, "read") && strings.HasSuffix(esIndex.Name, "me")) {
 			event.Leak.Dataset.Infected = true
 			if ransomNote, found := plugin.GetRansomNote(ctx, fmt.Sprintf(ransomPath, esIndex.Name), event); found {
 				event.Leak.Dataset.RansomNotes = append(event.Leak.Dataset.RansomNotes, ransomNote)
@@ -166,8 +166,8 @@ func (plugin ElasticSearchExplorePlugin) GetRansomNote(ctx context.Context, url 
 }
 
 type ElasticSearchResponse struct {
-	Hits struct{
-		Hits []struct{
+	Hits struct {
+		Hits []struct {
 			Source json.RawMessage `json:"_source"`
 		} `json:"hits"`
 	} `json:"hits"`

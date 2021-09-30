@@ -16,11 +16,11 @@ func (WpUserEnumHttp) GetVersion() (int, int, int) {
 
 func (WpUserEnumHttp) GetRequests() []l9format.WebPluginRequest {
 	return []l9format.WebPluginRequest{{
-		Method: "GET",
-		Path: "/?rest_route=/wp/v2/users/",
+		Method:  "GET",
+		Path:    "/?rest_route=/wp/v2/users/",
 		Headers: map[string]string{},
-		Body:[]byte(""),
-		Tags: []string{"wordpress"},
+		Body:    []byte(""),
+		Tags:    []string{"wordpress"},
 	}}
 }
 
@@ -54,8 +54,8 @@ func (plugin WpUserEnumHttp) Verify(request l9format.WebPluginRequest, response 
 }
 
 type WpUserReply struct {
-	Id int64
+	Id   int64
 	Name string
-	Url string
+	Url  string
 	Slug string
 }

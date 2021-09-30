@@ -22,7 +22,7 @@ func (DotDsStoreOpenPlugin) GetVersion() (int, int, int) {
 }
 
 func (DotDsStoreOpenPlugin) GetProtocols() []string {
-	return []string{"http","https"}
+	return []string{"http", "https"}
 }
 
 func (DotDsStoreOpenPlugin) GetName() string {
@@ -38,7 +38,7 @@ func (plugin DotDsStoreOpenPlugin) Run(ctx context.Context, event *l9format.L9Ev
 	results := plugin.getDsStoreFiles(ctx, event, event.Url(), "/")
 	if len(results) > 0 {
 		event.Summary = fmt.Sprintf("Found %d files trough .DS_Store spidering:\n\n", len(results))
-		event.Summary += strings.Join(results,"\n")
+		event.Summary += strings.Join(results, "\n")
 		event.Leak.Severity = l9format.SEVERITY_LOW
 		if len(results) > 32 {
 			event.Leak.Severity = l9format.SEVERITY_MEDIUM
@@ -66,7 +66,7 @@ var sensitiveFilePatterns = []string{
 func checkSensitiveFilePatterns(files []string) (matches []string) {
 	for _, file := range files {
 		for _, sensitiveFilePattern := range sensitiveFilePatterns {
-			if match, err := regexp.MatchString(sensitiveFilePattern, file) ; err == nil && match {
+			if match, err := regexp.MatchString(sensitiveFilePattern, file); err == nil && match {
 				matches = append(matches, file)
 				// Don't match 2 patterns, proceed to next file
 				break
@@ -78,10 +78,10 @@ func checkSensitiveFilePatterns(files []string) (matches []string) {
 
 func (plugin DotDsStoreOpenPlugin) getDsStoreFiles(ctx context.Context, event *l9format.L9Event, rootUrl, path string) (results []string) {
 	history := make(map[string]bool)
-	if strings.HasPrefix(path,"/") || strings.HasSuffix(path, "/"){
-		path = strings.Trim(path,"/")
+	if strings.HasPrefix(path, "/") || strings.HasSuffix(path, "/") {
+		path = strings.Trim(path, "/")
 	}
-	if !strings.HasSuffix(rootUrl,"/") && len(path) > 0{
+	if !strings.HasSuffix(rootUrl, "/") && len(path) > 0 {
 		rootUrl += "/"
 	}
 	checkUrl := rootUrl + path + "/.DS_Store"
@@ -126,12 +126,12 @@ func (plugin DotDsStoreOpenPlugin) getDsStoreFiles(ctx context.Context, event *l
 			return results
 		}
 		if len(path) > 0 {
-			results = append(results, "/" + path + "/" + filename)
+			results = append(results, "/"+path+"/"+filename)
 		} else {
-			results = append(results, "/" + filename)
+			results = append(results, "/"+filename)
 		}
-		if !strings.Contains(filename, ".") || strings.HasPrefix(filename,".") {
-			results = append(results, plugin.getDsStoreFiles(ctx, event, rootUrl, path + "/" + filename)...)
+		if !strings.Contains(filename, ".") || strings.HasPrefix(filename, ".") {
+			results = append(results, plugin.getDsStoreFiles(ctx, event, rootUrl, path+"/"+filename)...)
 		}
 	}
 	return results

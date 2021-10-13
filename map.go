@@ -7,6 +7,7 @@ import (
 )
 
 var tcpPlugins = []l9format.ServicePluginInterface{
+	tcp.Apache2449TraversalPlugin{},
 	tcp.CouchDbOpenPlugin{},
 	tcp.ElasticSearchExplorePlugin{},
 	tcp.ElasticSearchOpenPlugin{},
@@ -31,6 +32,7 @@ var webPlugins = []l9format.WebPluginInterface{
 	web.FirebaseHttpPlugin{},
 	web.WpUserEnumHttp{},
 	web.ConfluenceVersionIssue{},
+	web.JiraPlugin{},
 }
 
 func GetTcpPlugins() []l9format.ServicePluginInterface {

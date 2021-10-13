@@ -1,9 +1,7 @@
 package web
-
 /*
  * Thanks to https://twitter.com/HaboubiAnis for pointers on this plugin.
  */
-
 import (
 	"fmt"
 	"github.com/LeakIX/l9format"

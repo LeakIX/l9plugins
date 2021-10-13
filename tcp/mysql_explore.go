@@ -16,7 +16,6 @@ type MysqlSchemaPlugin struct {
 	l9format.ServicePluginBase
 }
 
-
 func (MysqlSchemaPlugin) GetVersion() (int, int, int) {
 	return 0, 0, 1
 }
@@ -33,7 +32,7 @@ func (MysqlSchemaPlugin) GetStage() string {
 	return "explore"
 }
 
-func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) ( hasLeak bool) {
+func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event, options map[string]string) (hasLeak bool) {
 	if len(event.Service.Credentials.Username) < 1 {
 		log.Printf("No credentials found for %s:%s", net.JoinHostPort(event.Host, event.Port))
 		return false
@@ -51,7 +50,7 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 	var tableName string
 	var recordCount int64
 	var dataLength int64
-	tableListQuery, err := db.QueryContext(ctx,"SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_ROWS, DATA_LENGTH from  TABLES where table_schema != 'information_schema' AND table_schema != 'sys' AND table_schema != 'performance_schema';")
+	tableListQuery, err := db.QueryContext(ctx, "SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_ROWS, DATA_LENGTH from  TABLES where table_schema != 'information_schema' AND table_schema != 'sys' AND table_schema != 'performance_schema';")
 	if err != nil {
 		log.Println(err.Error())
 		return hasLeak
@@ -64,9 +63,9 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 		event.Leak.Dataset.Rows += recordCount
 		event.Leak.Dataset.Collections++
 		event.Leak.Dataset.Size += dataLength
-		if strings.Contains(strings.ToLower(tableName), "warning") {
+		if strings.Contains(strings.ToLower(tableName), "warning") || strings.HasPrefix(strings.ToLower(tableName), "readme") || strings.HasPrefix(strings.ToLower(tableName), "recover_your_") {
 			event.Leak.Dataset.Infected = true
-			if ransomNote, found := plugin.GetRansomNote(ctx, databaseName, tableName ,event, db) ; found{
+			if ransomNote, found := plugin.GetRansomNote(ctx, databaseName, tableName, event, db); found {
 				event.Leak.Dataset.RansomNotes = append(event.Leak.Dataset.RansomNotes, ransomNote)
 			}
 		}
@@ -77,6 +76,16 @@ func (plugin MysqlSchemaPlugin) Run(ctx context.Context, event *l9format.L9Event
 	event.Summary = fmt.Sprintf("Databases: %d, row count: %d, size: %s\n",
 		event.Leak.Dataset.Collections, event.Leak.Dataset.Rows, utils.HumanByteCount(event.Leak.Dataset.Size)) +
 		event.Summary
+	event.Leak.Severity = l9format.SEVERITY_MEDIUM
+	if event.Leak.Dataset.Infected {
+		event.Leak.Severity = l9format.SEVERITY_HIGH
+	}
+	if event.Leak.Dataset.Rows > 1000 {
+		event.Leak.Severity = l9format.SEVERITY_HIGH
+		if event.Leak.Dataset.Infected {
+			event.Leak.Severity = l9format.SEVERITY_CRITICAL
+		}
+	}
 	return true
 }
 
@@ -100,7 +109,7 @@ func (MysqlSchemaPlugin) GetRansomNote(ctx context.Context, databaseName, tableN
 		return "", false
 	}
 	for _, columnContent := range results {
-		if columnText, isString := columnContent.(*string); isString && len(*columnText) > 0{
+		if columnText, isString := columnContent.(*string); isString && len(*columnText) > 0 {
 			note += *columnText
 		}
 	}

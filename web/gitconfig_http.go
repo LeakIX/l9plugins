@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/LeakIX/l9format"
 	"gopkg.in/ini.v1"
+	"net/url"
 )
 
 type GitConfigHttpPlugin struct {
@@ -15,10 +16,10 @@ func (GitConfigHttpPlugin) GetVersion() (int, int, int) {
 
 func (GitConfigHttpPlugin) GetRequests() []l9format.WebPluginRequest {
 	return []l9format.WebPluginRequest{{
-		Method: "GET",
-		Path: "/.git/config",
+		Method:  "GET",
+		Path:    "/.git/config",
 		Headers: map[string]string{},
-		Body:[]byte(""),
+		Body:    []byte(""),
 	}}
 }
 
@@ -41,6 +42,13 @@ func (plugin GitConfigHttpPlugin) Verify(request l9format.WebPluginRequest, resp
 		event.Summary += string(response.Body)
 		event.Leak.Dataset.Files++
 		event.Leak.Dataset.Size = int64(len(response.Body))
+		event.Leak.Severity = l9format.SEVERITY_MEDIUM
+		if gitUrl, err := url.Parse(section.Key("url").Value()); err == nil && gitUrl != nil && gitUrl.User != nil && len(gitUrl.User.Username()) > 0 {
+			event.Leak.Severity = l9format.SEVERITY_HIGH
+			if gitPassword, hasPassword := gitUrl.User.Password(); hasPassword && len(gitPassword) > 0 {
+				event.Leak.Severity = l9format.SEVERITY_CRITICAL
+			}
+		}
 		return true
 	}
 	return false

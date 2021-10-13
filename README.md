@@ -28,6 +28,9 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |couchdb_open|couchdb|open|Connects and list databases, sizes|
 |firebase_http|firebase|open|Connects to firebase and checks for `.json` files|@phretor|
 |confluence_version|http|http|Scans confluence for vulnerable versions|@HaboubiAnis|
+|jira_plugin|http|http|Scans Jira for vulnerable versions|@HaboubiAnis|
+|apache_traversal|http|http|Scan servers for Apache LFI|@HaboubiAnis|
+
 ### Creating service plugins
 
 Checkout the [l9plugin documentation](https://github.com/LeakIX/l9format/blob/master/l9plugin.md) on how to create your plugins.

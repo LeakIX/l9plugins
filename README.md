@@ -30,6 +30,8 @@ They are currently used by [l9explore](https://github.com/LeakIX/l9explore) but 
 |confluence_version|http|http|Scans confluence for vulnerable versions|@HaboubiAnis|
 |jira_plugin|http|http|Scans Jira for vulnerable versions|@HaboubiAnis|
 |apache_traversal|http|http|Scan servers for Apache LFI|@HaboubiAnis|
+|wpenum_http|http|http|Enumerates Wordpress users from CVE-2017-5487|
+|dotdsstore_open|http|open|Reads `.DS_Store` to enumerate files and directories on target|
 
 ### Creating service plugins
 

@@ -18,7 +18,6 @@ require (
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
-	gitlab.nobody.run/tbi/socksme v0.0.0-20201130024528-3ad02d4108c5 // indirect
 	go.mongodb.org/mongo-driver v1.5.4
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	golang.org/x/net v0.0.0-20211208012354-db4efeb81f4b // indirect
